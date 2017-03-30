@@ -38,7 +38,7 @@ public class ConnectionToOracle implements Connection{
 		try {
 
 			connection = DriverManager.getConnection(
-					"jdbc:oracle:thin:@(DESCRIPTION =(ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(HOST = orca.csc.ncsu.edu)(PORT = 1521)))(CONNECT_DATA =(SERVICE_NAME = orcl.csc.ncsu.edu)))", "agoel5","200130874");
+					"jdbc:oracle:thin:@(DESCRIPTION =(ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(HOST = orca.csc.ncsu.edu)(PORT = 1521)))(CONNECT_DATA =(SERVICE_NAME = orcl.csc.ncsu.edu)))", "samunot","200157647");
 
 		} catch (SQLException e) {
 
