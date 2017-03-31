@@ -10,7 +10,9 @@ public class Test {
 		ConnectionToOracle con = new ConnectionToOracle();
 		PreparedStatement state = null;
 			conn = con.returnConnection();
-			state = conn.prepareStatement("Insert into Student values (9999,'Rk')");
+			state = conn.prepareStatement("Insert into Student values (?,?)");
+			state.setInt(1, 333);
+			state.setString(2, "shubham");
 			boolean result = state.execute();
 			state.close();
 			conn.close();
