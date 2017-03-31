@@ -1,10 +1,11 @@
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Controller {
 	
 	static DatabaseHandler dbhandler;
 	
-	public static void main(String[] arg){
+	public static void main(String[] arg)throws SQLException{
 		dbhandler = new DatabaseHandler();
 		int isStudent = login();
 		if(isStudent==1){
@@ -16,7 +17,7 @@ public class Controller {
 		}
 	}
 	
-	private static int login(){
+	private static int login()throws SQLException{
 		Scanner sc = new Scanner(System.in);
 		System.out.print("Enter username: ");
 		String username = sc.next();
