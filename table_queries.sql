@@ -153,3 +153,18 @@ create table enrolled(
 	primary key (student_id,year,semester,course_id),
 	constraint enrolled_check check (enrolledStatus>=0 AND enrolledStatus<=1)
 	);
+
+create table CostAndLimit(
+educationlevel varchar(20) ,
+residency varchar(20) ,
+minCredit int,
+maxCredit int,
+costPerCredit int,
+primary key (educationlevel,residency)
+);
+
+create table GradingSystem(
+grade varchar(20),
+pointsPerHour float,
+primary key(grade)
+);
