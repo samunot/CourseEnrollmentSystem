@@ -1,7 +1,7 @@
 
-//create table queries 
+--create table queries 
 
-create table user(
+create table users(
 	firstName varchar(20) NOT NULL,
 	lastName varchar(20),
 	email varchar(40) NOT NULL UNIQUE,
@@ -13,14 +13,15 @@ create table user(
 	state varchar(20),
 	user_id int,
 	primary key (user_id),
-	constraint role_check check (role>=0 AND role<=2)
+	constraint role_check check (role>=0 AND role<=2),
+	constraint zip_check check (zip>=0 AND zip<100000)
 	);
 
 create table admin(
 	ssn int NOT NULL UNIQUE,
 	admin_id int,
 	user_id int,
-	foreign key (user_id) REFERENCES user,
+	foreign key (user_id) REFERENCES users,
 	primary key (admin_id)
 	);
 
@@ -33,15 +34,16 @@ create table student(
 	residencyLevel int NOT NULL,
 	tuitionBill float,
 	gradLevel int NOT NULL,
-	hasGraduated boolean,
-	foreign key (user_id) REFERENCES user,
-	primary key (student_id)
+	hasGraduated int,
+	foreign key (user_id) REFERENCES users,
+	primary key (student_id),
+	constraint boolean_check check (hasGraduated>=0 AND hasGraduated<=1)
 	);
 
 create table faculty(
 	faculty_id int,
 	user_id int,
-	foreign key (user_id) REFERENCES user,
+	foreign key (user_id) REFERENCES users,
 	primary key (faculty_id)
 	);
 
@@ -59,8 +61,9 @@ create table course(
 	minGPA float,
 	gradLevel int NOT NULL,
 	credits int NOT NULL,
-	permission boolean DEFAULT FALSE,
-	primary key (course_id)
+	permission int,
+	primary key (course_id),
+	constraint perm_check check (permission>=0 AND permission<=1)
 	);
 
 create table offering(
@@ -70,11 +73,10 @@ create table offering(
 	maxWaitist int,
 	location varchar(20),
 	maxSize int,
-	scheduleDay varchar(20),
-	scheduleTime time,
+	scheduleDay varchar(10),
+	scheduleTime varchar(20),
 	foreign key (course_id) REFERENCES course,
-	foreign key (year) REFERENCES term,
-	foreign key (semester) REFERENCES term,
+	foreign key (year,semester) REFERENCES term,
 	primary key (course_id,year,semester)
 	);
 
@@ -130,11 +132,10 @@ create table createCourse(
 create table teaches(
 	faculty_id int,
 	year int,
-	semester varchar(10)
+	semester varchar(10),
 	course_id varchar(20),
 	foreign key (faculty_id) REFERENCES faculty,
-	foreign key (year) REFERENCES term,
-	foreign key (semester) REFERENCES term,
+	foreign key (year,semester) REFERENCES term,
 	foreign key (course_id) REFERENCES course,
 	primary key (faculty_id,year,semester,course_id)
 	);
@@ -146,19 +147,9 @@ create table enrolled(
 	semester varchar(10),
 	grade varchar(2),
 	waitlistNumber int,
-	enrolledStatus boolean,
+	enrolledStatus int,
 	foreign key (student_id) REFERENCES student,
-	foreign key (year) REFERENCES offering,
-	foreign key (semester) REFERENCES offering,
-	foreign key (course_id) REFERENCES offering,
-	primary key (student_id,year,semester,course_id)
+	foreign key (course_id,year,semester) REFERENCES offering,
+	primary key (student_id,year,semester,course_id),
+	constraint enrolled_check check (enrolledStatus>=0 AND enrolledStatus<=1)
 	);
-
-
-Create
-//insert in 
-
-insert into fallcourse values('Introduction to Computer Science', 'CSC401', 3, 3, 'CS', 'Undergraduate', 2, 2, 'M,W 12:00PM-1:00PM', null);
-insert into fallcourse values('Independent Study', 'CSC525', 3, 1, 'CSC525', 'Graduate', 2, 0, 'M,W 3:00PM-4:00PM', 'Requires Special Permission');
-insert into fallcourse values('Database', 'CSC510', 3, 3, 'CS', 'Graduate', 5, 2, 'Tu,Th 1:00PM-2:00PM', null);
-insert into fallcourse values('Software Engineering', 'CSC515', 3, 3, 'CS', 'Graduate', 3, 2, 'Tu,Th 2:00PM-3:00PM', null);
