@@ -18,7 +18,7 @@ create table users(
 
 create table admin(
 	employee_id int,
-	username int,
+	username varchar(20)
 	ssn int NOT NULL UNIQUE,
 	foreign key (username) REFERENCES users,
 	primary key (employee_id)
@@ -26,7 +26,7 @@ create table admin(
 
 create table student(
 	student_id int,
-	username int,
+	username varchar(20),
 	gpa float,
 	termEnrolled varchar(10),
 	residencyLevel varchar(20) NOT NULL,
@@ -36,7 +36,7 @@ create table student(
 	gradLevel int NOT NULL,
 	hasGraduated char(1) NOT NULL,
 	email varchar(40) NOT NULL,
-	foreign key (user_id) REFERENCES users,
+	foreign key (username) REFERENCES users,
 	primary key (student_id),
 	constraint hasGraduated_check check (hasGraduated like '[YyNn]')
 	);
