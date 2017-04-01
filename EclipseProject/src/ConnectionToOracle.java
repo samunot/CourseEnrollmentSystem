@@ -45,12 +45,6 @@ public class ConnectionToOracle implements Connection{
 			System.out.println("Connection Failed! Check output console");
 
 		}
-
-		if (connection != null) {
-			System.out.println("connected");
-		} else {
-			System.out.println("connection failed");
-		}
 	}
 	void connectionClose(){
 		try{
