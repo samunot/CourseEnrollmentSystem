@@ -69,7 +69,7 @@ create table course(
 	constraint perm_check check (permission like '[YyNn]')
 	);
 
-	create table department(
+create table department(
 	department_id varchar(20),
 	name varchar(40),
 	primary key (department_id)
