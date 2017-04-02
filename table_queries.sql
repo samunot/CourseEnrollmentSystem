@@ -32,14 +32,14 @@ create table student(
 	residencyLevel int NOT NULL,
 	tuitionBill float,
 	tuitionOwed float,
-            minCredit int ,
+        minCredit int,
 	maxCredit int,
 	gradLevel int NOT NULL,
 	hasGraduated char(1) NOT NULL,
 	email varchar(40) NOT NULL,
 	foreign key (username) REFERENCES users,
 	primary key (student_id),
-	constraint hasGraduated_check check (hasGraduated in ('Y','N')),
+	constraint hasGraduated_check check (hasGraduated in ('y','n')),
 	constraint level_check check(residencyLevel in ('international','in state','out of state'))
 	);
 
@@ -62,13 +62,13 @@ create table semester(
 create table course(
 	title varchar(50) NOT NULL UNIQUE,
 	course_id varchar(20),
-            department_id varchar(5),
+        department_id varchar(5),
 	gradLevel int NOT NULL,
 	credits int NOT NULL,
 	permission char(1) NOT NULL,
 	primary key (course_id),
-	foreign key (deoartment_id) REFERENCES department,
-	constraint perm_check check (permission like '[YyNn]')
+	foreign key (department_id) REFERENCES department,
+	constraint perm_check check (permission in ('y','n'))
 	);
 
 create table department(
@@ -148,7 +148,7 @@ create table enrolled(
 	foreign key (student_id) REFERENCES student,
 	foreign key (course_id,sem) REFERENCES semester,
 	primary key (student_id,sem,course_id),
-	constraint enrolled_check check (enrolledStatus like '[YyNn]')
+	constraint enrolled_check check (enrolledStatus in ('y','n'))
 	);
 
 create table costAndLimit(
