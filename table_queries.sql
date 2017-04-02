@@ -32,16 +32,18 @@ create table student(
 	residencyLevel int NOT NULL,
 	tuitionBill float,
 	tuitionOwed float,
-        minCredit int,
+	minCredit int,
 	maxCredit int,
 	gradLevel int NOT NULL,
-	hasGraduated char(1) NOT NULL,
-	email varchar(40) NOT NULL,
+	hasGraduated char(1) DEFAULT 'N',
+	email varchar(40),
 	foreign key (username) REFERENCES users,
 	primary key (student_id),
-	constraint hasGraduated_check check (hasGraduated in ('y','n')),
-	constraint level_check check(residencyLevel in ('international','in state','out of state'))
+	constraint hasGraduated_check check (hasGraduated in ('Y','N')),
+	constraint level_check check(residencyLevel in (1,2,3)),
+	constraint gradlevel_check check(gradLevel in (1,2))
 	);
+
 
 create table faculty(
 	faculty_id int,
@@ -62,23 +64,24 @@ create table semester(
 create table course(
 	title varchar(50) NOT NULL UNIQUE,
 	course_id varchar(20),
-        department_id varchar(5),
+	username int,
 	gradLevel int NOT NULL,
 	credits int NOT NULL,
 	permission char(1) NOT NULL,
 	primary key (course_id),
-	foreign key (department_id) REFERENCES department,
-	constraint perm_check check (permission in ('y','n'))
+	foreign key (username) REFERENCES admin,
+	constraint perm_check check (permission like '[YyNn]')
 	);
 
-create table department(
-	department_id varchar(5),
+	create table department(
+	department_id varchar(20),
 	name varchar(40),
 	primary key (department_id)
 	);
 
 create table offering(
 	course_id varchar(20),
+--	department_id varchar(20),
 	faculty_id int,
 	sem varchar(3),
 	maxWaitist int,
@@ -90,6 +93,7 @@ create table offering(
 	scheduleTime varchar(20),
 	foreign key (faculty_id) REFERENCES faculty,
 	foreign key (course_id) REFERENCES course,
+--	foreign key (department_id) REFERENCES department,
 	foreign key (sem) REFERENCES semester,
 	primary key (course_id,sem),
 	constraint waitlist_check check(maxWaitist>=studentsWaitlisted),
@@ -136,6 +140,14 @@ create table specialPermission(
 	primary key (student_id,course_id,sem)
 	);
 
+--create table createCourse(
+--	username int,
+--	course_id varchar(20),
+--	foreign key (username) REFERENCES admin,
+--	foreign key (course_id) REFERENCES course,
+--	primary key (username,course_id)
+--	);
+
 create table enrolled(
 	student_id int,
 	course_id varchar(20),
@@ -148,7 +160,7 @@ create table enrolled(
 	foreign key (student_id) REFERENCES student,
 	foreign key (course_id,sem) REFERENCES semester,
 	primary key (student_id,sem,course_id),
-	constraint enrolled_check check (enrolledStatus in ('y','n'))
+	constraint enrolled_check check (enrolledStatus like '[YyNn]')
 	);
 
 create table costAndLimit(
@@ -175,10 +187,12 @@ drop table enrolled;
 drop table costandlimit;
 drop table gradingsystem;
 drop table sem;
-drop table student;
-drop table faculty;
-drop table admin;
+
+
 drop table term;
 drop table department;
 drop table course;
+drop table faculty;
+drop table admin;
+drop table student;
 drop table users;
