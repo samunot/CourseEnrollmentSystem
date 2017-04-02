@@ -122,7 +122,7 @@ public class DatabaseHandler {
 					"select u.firstname,u.lastname,u.dob,s.residencylevel,s.gradlevel,s.tuitionowed,s.gpa from users u , student s where s.student_id = ? and s.username = u.username");
 			ResultSet rs = state.executeQuery();
 			if(!rs.next())	viewStudent();
-			
+			//System.out.println("1.First Name: "++"\n2.Last Name: "++"\n3.Date of birth(MM-DD-YYYY): "++"\n4.Student’s Level: "++"\n5.Student’s Residency Status: "++"\n6.Amount Owed(if any): "++""++"");
 			
 			System.out.println("");
 			return -1;
