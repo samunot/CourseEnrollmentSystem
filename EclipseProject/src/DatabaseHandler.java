@@ -441,16 +441,18 @@ public class DatabaseHandler {
 			int csize = sc.nextInt();
 			System.out.print("Enter wait list size: ");
 			int wsize = sc.nextInt();
-			
-			state = con.prepareStatement("Insert into offering(course_id, sem, schedule, maxsize, maxwaitist) values (?,?,?,?,?)");
+
+			state = con.prepareStatement(
+					"Insert into offering(course_id, sem, schedule, maxsize, maxwaitist) values (?,?,?,?,?)");
 			state.setString(1, courseid);
 			state.setString(2, sem);
 			state.setString(3, schedule);
 			state.setInt(4, csize);
 			state.setInt(5, wsize);
 			state.executeQuery();
-			
-			state = con.prepareStatement("Insert into facultyoffering values(course_id, sem, faculty_id) values(?,?,?)");
+
+			state = con
+					.prepareStatement("Insert into facultyoffering values(course_id, sem, faculty_id) values(?,?,?)");
 			state.setString(1, courseid);
 			state.setString(2, sem);
 			for (int i = 0; i < faculty.length; i++) {
@@ -635,6 +637,49 @@ public class DatabaseHandler {
 		}
 	}
 
+	public void StudentViewPendingCourse(String username) {
+		try {
+			state = con.prepareStatement("select c.course_id,c.title from course c,enrolled e,student s,offering o "
+					+ "where s.username=? and e.student_id=s.student_id and c.course_id=e.course_id and e.sem='S17' "
+					+ "and e.waitlistnumber>0 and o.maxwaitist>0");
+			state.setString(1, username);
+			ResultSet rs = state.executeQuery();
+			if (rs.isBeforeFirst()) {
+				System.out.println("Waitlisted courses:\nCourseID\tCourse Name");
+				while (rs.next()) {
+					System.out.println(rs.getString(1) + "\t\t" + rs.getString(2));
+				}
+			} else
+				System.out.print("\nNo waitlisted courses.");
+			state = con.prepareStatement("select c.course_id,c.title from course c,student s,specialpermission sp "
+					+ "where s.username=? and sp.student_id=s.student_id and c.course_id=sp.course_id and sp.sem='S17' "
+					+ "and sp.approvedate is null");
+			state.setString(1, username);
+			ResultSet rs1 = state.executeQuery();
+			if (rs1.isBeforeFirst()) {
+				System.out.println("Rejected courses:\nCourseID\tCourse Name");
+				while (rs1.next()) {
+					System.out.println(rs1.getString(1) + "\t\t" + rs1.getString(2));
+				}
+			} else
+				System.out.print("\n No rejected courses.");
+			state = con.prepareStatement("select c.course_id,c.title from course c,student s,specialpermission sp "
+					+ "where s.username=? and sp.student_id=s.student_id and c.course_id=sp.course_id and sp.sem='S17' "
+					+ "and sp.approvestatus ='N'");
+			state.setString(1, username);
+			ResultSet rs2 = state.executeQuery();
+			if (rs2.isBeforeFirst()) {
+				System.out.println("Pending courses:\nCourseID\tCourse Name");
+				while (rs2.next()) {
+					System.out.println(rs2.getString(1) + "\t\t" + rs2.getString(2));
+				}
+			} else
+				System.out.print("\n No Pending courses");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	// graded courses will have null values in grade attribute of enrolled
 	// table.
 	public void StudentViewGPA(String username) {
@@ -683,6 +728,60 @@ public class DatabaseHandler {
 				} else
 					System.out.print("\nThe payment amount exceeds the owed bill. Please choose a smaller amount.");
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void StudentViewMyCourses(String username) {
+		try {
+			sc = new Scanner(System.in);
+			state = con.prepareStatement(
+					"select c.course_id,c.title from course c,enrolled e,student s where s.username=? and e.student_id=s.student_id and e.enrolledstatus='Y' and e.sem='F16' and c.course_id=e.course_id");
+			state.setString(1, username);
+			ResultSet rs = state.executeQuery();
+			System.out.println("CourseID\tCourse Name");
+			while (rs.next()) {
+				System.out.println(rs.getString(1) + "\t\t" + rs.getString(2));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void StudentViewAvailableCourse(String username) {
+		try {
+			sc = new Scanner(System.in);
+			state = con.prepareStatement(
+					"select o1.course_id from offering o1 where o1.sem='S17' AND o1.maxsize>o1.studentsenrolled union(select o2.course_id from offering o2 where o2.sem='S17' AND o2.maxsize=o2.studentsenrolled AND o2.maxwaitist>o2.studentswaitlisted)");
+			ResultSet rs = state.executeQuery();
+			if (rs.isBeforeFirst()) {
+				System.out.println("Available courses are:");
+				int i = 1;
+				String[] course = new String[rs.getFetchSize()];
+				while (rs.next()) {
+					course[i - 1] = rs.getString(1);
+					System.out.println(i + "." + course[i - 1]);
+					i++;
+				}
+				System.out.print("Select a course to enroll.");
+				int id = sc.nextInt();
+				state = con.prepareStatement(
+						"select count(*) from prereq where courseprereq_id not in (select e.course_id from e.enrolled,s.student where s.student_id=e.student_id and s.username=? and e.course_id=?)");
+				state.setString(1, username);
+				state.setString(2, course[id]);
+				ResultSet rs1 = state.executeQuery();
+				if (rs1.next()) {
+					if (rs1.getInt(1) > 0) {
+						System.out.println("You can't enroll since prequisite course/s is not taken.");
+					}
+				} else {
+					state = con.prepareStatement("insert into enroll values()");
+				}
+
+			} else
+				System.out.print("\nNo courses available right now.");
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
