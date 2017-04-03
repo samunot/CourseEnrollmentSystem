@@ -48,7 +48,7 @@ public class DatabaseHandler {
 		}
 	}
 
-	public void viewAdminProfile(String username) throws SQLException {
+	public void viewAdminProfile(String username) {
 		try {
 			state = con.prepareStatement("Select firstname, lastname, dob from users where username = ?");
 			state.setString(1, username);
@@ -67,7 +67,7 @@ public class DatabaseHandler {
 		}
 	}
 
-	public void enrollStudent() throws SQLException {
+	public void enrollStudent() {
 		try {
 			System.out.print("1.Enter Student Username: ");
 			String username = sc.next();
@@ -183,10 +183,10 @@ public class DatabaseHandler {
 				System.out.println("No courses graded yet!");
 			} else {
 				System.out.println("Press 0 to go back");
-				String key = sc.next();
-				while (!key.equals("0")) {
+				int key = sc.nextInt();
+				while (key != 0) {
 					System.out.println("Invalid Option");
-					key = sc.next();
+					key = sc.nextInt();
 				}
 			}
 			viewEnterGrade(studentid);
@@ -233,11 +233,93 @@ public class DatabaseHandler {
 		}
 	}
 
+	public void viewAddCourse() {
+		System.out.println(
+				"Select Appropriate Menu Option:\n0.Go Back To Previous Menu\n1.View Course\n2.Add New Course");
+		int key = sc.nextInt();
+		switch (key) {
+		case 0:
+			return;
+		case 1:
+			viewCourse();
+			break;
+		case 2:
+			addCourse();
+			break;
+		default:
+			System.out.println("Invalid choice. Please try again!");
+			viewAddCourse();
+			break;
+		}
+	}
+
+	public void viewCourse() {
+		try {
+			System.out.println("Please Enter Course Id:");
+			String courseid = sc.next();
+			state = con.prepareStatement(
+					"select c.title, d.name, c.gradlevel, c.mingpa, c.permission, c.credits from course c, department d where c.course_id = ? and d.department_id in (select department_id from departmentcourse where course_id = ?)");
+			state.setString(1, courseid);
+			state.setString(2, courseid);
+			ResultSet rs = state.executeQuery();
+			if (rs.next())
+				System.out.println("1.Course Name: " + rs.getString(1) + "\n2.Department Name: " + rs.getString(2)
+						+ "\n3.Level: " + rs.getInt(3) + "\n4.GPA Requirement(if any): " + rs.getFloat(4)
+						+ "\n5.Special Approval Required: " + rs.getString(5) + "\n6.Number Of Credits: "
+						+ rs.getString(6));
+			state = con.prepareStatement(
+					"select title from course where course_id in (select courseprereq_id from prereq where course_id = ?)");
+			state.setString(1, courseid);
+			rs = state.executeQuery();
+			System.out.println("List of prerequisite courses: ");
+			while (rs.next()) {
+				System.out.println(rs.getString(1));
+			}
+			System.out.println("Press 0 to go back");
+			int key = sc.nextInt();
+			while (key != 0) {
+				System.out.println("Invalid Option");
+				key = sc.nextInt();
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+
+	public void addCourse() {
+		try {
+			System.out.println("Enter Course Id: ");
+			String courseid = sc.next();
+			System.out.println("Enter Course Name: ");
+			String title = sc.next();
+			System.out.println("Enter Department Name: ");
+			String depname = sc.next();
+			System.out.println("Enter Course Level: ");
+			int gradlevel = sc.nextInt();
+			System.out.println("Enter GPA Requirement(enter 0 if no gpa requirement): ");
+			float mingpa = sc.nextFloat();
+			System.out.println("Enter prerequisite courses: ");
+			
+			System.out.println("Special Approval Required(Y/N): ");
+			String perm = sc.next();
+			state = con.prepareStatement("");
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+
 	// Closing the database connection
-	public void close() throws SQLException {
-		if (state != null)
-			state.close();
-		con.close();
-		conOracle.close();
+	public void close() {
+		try {
+			if (state != null)
+				state.close();
+			con.close();
+			conOracle.close();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
 	}
 }

@@ -8,13 +8,13 @@ public class Controller {
 	static DatabaseHandler dbhandler;
 	static String username;
 
-	public static void main(String[] arg) throws SQLException, ParseException {
+	public static void main(String[] arg) {
 		dbhandler = new DatabaseHandler();
 		sc = new Scanner(System.in);
 		loginExit();
 	}
 
-	private static void loginExit() throws SQLException, ParseException {
+	private static void loginExit() {
 		sc = new Scanner(System.in);
 		System.out.println("1.Login\n2.Exit\nEnter choice");
 		int key = sc.nextInt();
@@ -31,7 +31,7 @@ public class Controller {
 		}
 	}
 
-	private static void login() throws SQLException, ParseException {
+	private static void login() {
 		System.out.print("1.Username: ");
 		username = sc.next();
 		System.out.print("2.Password: ");
@@ -47,7 +47,7 @@ public class Controller {
 		}
 	}
 
-	private static void adminFunctions() throws SQLException, ParseException {
+	private static void adminFunctions() {
 		System.out.println(
 				"1.View  Profile\n2.Enroll a new Student\n3.View Student's details\n4.View or Add Courses\n5.View or Add Course Offering\n6.View or Approve Special Enrollment Requests\n7.Enforce Add or Drop Deadline\n8.Logout");
 
@@ -65,6 +65,7 @@ public class Controller {
 			dbhandler.viewStudent();
 			adminFunctions();
 			break;
+		case 4:
 		case 8:
 			loginExit();
 			break;
