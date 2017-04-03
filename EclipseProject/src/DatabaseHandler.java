@@ -286,6 +286,14 @@ public class DatabaseHandler {
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
+			System.out.println("Invalid values! Press 0 to go back or 1 to retry");
+			int choice = sc.nextInt();
+			while(!(choice==0 || choice==1)){
+				System.out.println("Please enter valid option");
+				choice = sc.nextInt();
+			}
+			if(choice==1)	viewCourse();
+			else return;
 		}
 	}
 
@@ -418,8 +426,14 @@ public class DatabaseHandler {
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
-			System.out.println("Invalid values. Please try again!");
-			viewOffering();
+			System.out.println("Invalid values! Press 0 to go back or 1 to retry");
+			int choice = sc.nextInt();
+			while(!(choice==0 || choice==1)){
+				System.out.println("Please enter valid option");
+				choice = sc.nextInt();
+			}
+			if(choice==1)	viewOffering();
+			else return;
 		}
 	}
 
