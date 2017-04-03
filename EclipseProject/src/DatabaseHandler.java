@@ -125,28 +125,31 @@ public class DatabaseHandler {
 					"select u.firstname,u.lastname,u.dob,s.gradlevel,s.residencylevel,s.tuitionowed,s.gpa,u.phone,s.email,u.street,u.city,u.zip,u.state from users u , student s where s.student_id = ? and s.username = u.username");
 			state.setInt(1, studentid);
 			ResultSet rs = state.executeQuery();
-			if (rs == null) {
+			if (rs.next()) {
+				DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
+				String address = rs.getString(10) + " " + rs.getString(11) + " " + rs.getInt(12) + " "
+						+ rs.getString(13);
+				System.out.println("1.First Name: " + rs.getString(1) + "\n2.Last Name: " + rs.getString(2)
+						+ "\n3.Date of birth(MM-DD-YYYY): " + df.format(rs.getDate(3)) + "\n4.Student’s Level: "
+						+ rs.getInt(4) + "\n5.Student’s Residency Status: " + rs.getInt(5) + "\n6.Amount Owed(if any): "
+						+ rs.getFloat(6) + "\n7.GPA: " + rs.getFloat(7) + "\n8.Phone: " + rs.getInt(8) + "\n9.Email: "
+						+ rs.getString(9) + "\n10.Address: " + address);
+				System.out.println("Press 0 To Go Back To Previous Menu\nPress 1 To View or Enter Grades");
+				int key = sc.nextInt();
+				while (!(key == 0 || key == 1)) {
+					System.out.println("Invalid Option");
+					key = sc.nextInt();
+				}
+				if (key == 1) {
+					viewEnterGrade(studentid);
+				}
+
+			} else {
 				System.out.println("Invalid Student ID! Please try again");
 				viewStudent();
 				return;
 			}
-			rs.next();
-			DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
-			String address = rs.getString(10) + " " + rs.getString(11) + " " + rs.getInt(12) + " " + rs.getString(13);
-			System.out.println("1.First Name: " + rs.getString(1) + "\n2.Last Name: " + rs.getString(2)
-					+ "\n3.Date of birth(MM-DD-YYYY): " + df.format(rs.getDate(3)) + "\n4.Student’s Level: "
-					+ rs.getInt(4) + "\n5.Student’s Residency Status: " + rs.getInt(5) + "\n6.Amount Owed(if any): "
-					+ rs.getFloat(6) + "\n7.GPA: " + rs.getFloat(7) + "\n8.Phone: " + rs.getInt(8) + "\n9.Email: "
-					+ rs.getString(9) + "\n10.Address: " + address);
-			System.out.println("Press 0 To Go Back To Previous Menu\nPress 1 To View or Enter Grades");
-			int key = sc.nextInt();
-			while (!(key == 0 || key == 1)) {
-				System.out.println("Invalid Option");
-				key = sc.nextInt();
-			}
-			if (key == 1) {
-				viewEnterGrade(studentid);
-			}
+
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -289,23 +292,200 @@ public class DatabaseHandler {
 
 	public void addCourse() {
 		try {
-			System.out.println("Enter Course Id: ");
-			String courseid = sc.next();
-			System.out.println("Enter Course Name: ");
-			String title = sc.next();
-			System.out.println("Enter Department Name: ");
-			String depname = sc.next();
-			System.out.println("Enter Course Level: ");
+			System.out.print("Enter Course ID: ");
+			String courseid = sc.nextLine();
+			System.out.print("Enter Course Name: ");
+			String title = sc.nextLine();
+			System.out.print("Enter Department ID: ");
+			String depid = sc.nextLine();
+			System.out.print("Enter Course Level: ");
 			int gradlevel = sc.nextInt();
-			System.out.println("Enter GPA Requirement(enter 0 if no gpa requirement): ");
+			System.out.print("Enter GPA Requirement(enter 0 if no gpa requirement): ");
 			float mingpa = sc.nextFloat();
-			System.out.println("Enter prerequisite courses: ");
-			
-			System.out.println("Special Approval Required(Y/N): ");
+
+			System.out.print("Enter the number of prerequiste courses: ");
+			int pr = sc.nextInt();
+			String[] prereq = new String[pr];
+			if (pr > 0) {
+				System.out.print("Enter prerequisite course IDs: ");
+				for (int i = 0; i < prereq.length; i++) {
+					prereq[i] = sc.nextLine();
+				}
+			}
+
+			System.out.print("Special Approval Required(Y/N): ");
 			String perm = sc.next();
-			state = con.prepareStatement("");
+			System.out.print("Are there variable number of credits?(y/n): ");
+			String yes = sc.next();
+			String credits;
+			if (yes.equalsIgnoreCase("y")) {
+				System.out.print("Enter minimum number of credits: ");
+				int min = sc.nextInt();
+				System.out.print("Enter maximum number of credits: ");
+				int max = sc.nextInt();
+				credits = min + "-" + max;
+			} else {
+				System.out.print("Enter Number Of Credits: ");
+				credits = sc.nextInt() + "";
+			}
+			state = con.prepareStatement(
+					"Insert into course (title, course_id, gradlevel, credits, permission, mingpa) values(?,?,?,?,?,?)");
+			state.setString(1, title);
+			state.setString(2, courseid);
+			state.setInt(3, gradlevel);
+			state.setString(4, credits);
+			state.setString(5, perm);
+			state.setFloat(6, mingpa);
+			state.executeUpdate();
+			state = con.prepareStatement("Insert into departmentcourse (DEPARTMENT_ID, Course_ID) values()");
+			state.setString(1, depid);
+			state.setString(2, courseid);
+			state.executeUpdate();
+			state = con.prepareStatement("Insert into prereq (courseprereq_id, course id)");
+			state.setString(2, courseid);
+			for (int i = 0; i < prereq.length; i++) {
+				state.setString(1, prereq[i]);
+				state.executeUpdate();
+			}
+			System.out.println("Course Successfully added!");
 		} catch (Exception e) {
 			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+
+	// Student Functions
+
+	public void StudentViewProfile(String username) {
+		try {
+			state = con.prepareStatement(
+					"select u.firstname,u.lastname,s.email,u.phone,s.gradlevel,s.residencylevel from student s,users u where s.username= ? and s.username = u.username");
+			state.setString(1, username);
+			ResultSet rs = state.executeQuery();
+			// if (rs != null)
+			rs.next();
+			System.out.print("\n1. First Name:\t" + rs.getString(1) + "\n2. Last Name:\t" + rs.getString(2)
+					+ "\n3. Email:\t" + rs.getString(3) + "\n4. Phone:\t" + rs.getString(4) + "\n5. Level:\t"
+					+ (rs.getString(5).equalsIgnoreCase("1") ? "undergraduate" : "graduate") + "\n6. Status:\t"
+					+ (rs.getString(6).equalsIgnoreCase("1") ? "in state"
+							: rs.getString(6).equalsIgnoreCase("2") ? "out of state" : "international"));
+			System.out.print("\nSelect option 1-4 to edit.\nPress 0 to go back.");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void StudentEditFirstName(String username, String name) {
+		try {
+			state = con.prepareStatement("Update users set firstname=? where username=?");
+			state.setString(1, name);
+			state.setString(2, username);
+			ResultSet rs = state.executeQuery();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void StudentEditLastName(String username, String name) {
+		try {
+			state = con.prepareStatement("Update users set lastname=? where username=?");
+			state.setString(1, name);
+			state.setString(2, username);
+			ResultSet rs = state.executeQuery();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void StudentEditEmail(String username, String email) {
+		try {
+			state = con.prepareStatement("Update student set email=? where username=?");
+			state.setString(1, email);
+			state.setString(2, username);
+			ResultSet rs = state.executeQuery();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void StudentEditPhone(String username, String phone) {
+		try {
+			state = con.prepareStatement("Update users set phone=? where username=?");
+			state.setString(1, phone);
+			state.setString(2, username);
+			ResultSet rs = state.executeQuery();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void StudentViewGrades(String username) {
+		try {
+			state = con.prepareStatement(
+					"select e.course_id,e.grade from enrolled e,student s where s.username=? and s.student_id=e.student_id and e.grade is not null");
+			state.setString(1, username);
+			ResultSet rs = state.executeQuery();
+			if (rs.isBeforeFirst()) {
+				System.out.println("Course \t Grade");
+				while (rs.next()) {
+					System.out.println(rs.getString(1) + "\t" + rs.getString(2));
+				}
+			} else
+				System.out.println("You have no graded courses.");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	// graded courses will have null values in grade attribute of enrolled
+	// table.
+	public void StudentViewGPA(String username) {
+		try {
+			state = con.prepareStatement("select gpa from student where username=?");
+			state.setString(1, username);
+			ResultSet rs = state.executeQuery();
+			if (rs.next()) {
+				System.out
+						.println("Your GPA is " + (rs.getString(1) != null ? rs.getString(1) : "still not available."));
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void StudentViewBill(String username) {
+		try {
+			state = con.prepareStatement("select tuitionowed from student where username=?");
+			state.setString(1, username);
+			ResultSet rs = state.executeQuery();
+			if (rs.next()) {
+				System.out.println("Your total bill is " + rs.getString(1));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void StudentPayBill(String username) {
+		try {
+			sc = new Scanner(System.in);
+			System.out.print("Enter the amount to be paid: ");
+			float amount = sc.nextFloat();
+			state = con.prepareStatement("select tuitionowed from student where username=?");
+			state.setString(1, username);
+			ResultSet rs = state.executeQuery();
+			if (rs.next()) {
+				if (rs.getFloat(1) >= amount) {
+					state = con.prepareStatement("update student set tuitionowed=tuitionowed-? where username=?");
+					state.setFloat(1, amount);
+					state.setString(2, username);
+					ResultSet rs1 = state.executeQuery();
+					System.out.print("\nYou have successfully paid " + amount + " amount.");
+				} else
+					System.out.print("\nThe payment amount exceeds the owed bill. Please choose a smaller amount.");
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

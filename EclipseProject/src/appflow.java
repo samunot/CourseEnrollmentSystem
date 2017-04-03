@@ -205,7 +205,7 @@ public class appflow {
 	}
 	private static int StudentViewProfile() throws SQLException,ParseException{
 		sc = new Scanner(System.in);
-		dbhandler.StudentViewProfile(username);
+		//dbhandler.StudentViewProfile(username);
 		return 0;
 	}
 	private static int StudentEnrollViewDropCourse() throws SQLException,ParseException{

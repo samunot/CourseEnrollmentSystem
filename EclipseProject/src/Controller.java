@@ -38,7 +38,10 @@ public class Controller {
 		String password = sc.next();
 		int isStudent = dbhandler.loginValidate(username, password);
 		if (isStudent == 1) {
-			// studentFunctions();
+			while (true)
+				if (studentFunctions() == 1)
+					break;
+			loginExit();
 		} else if (isStudent == 2) {
 			adminFunctions();
 		} else {
@@ -66,6 +69,9 @@ public class Controller {
 			adminFunctions();
 			break;
 		case 4:
+			dbhandler.viewAddCourse();
+			adminFunctions();
+			break;
 		case 8:
 			loginExit();
 			break;
@@ -74,22 +80,129 @@ public class Controller {
 		}
 	}
 
-	private static void studentFunctions() {
-		System.out.println("1.Enroll courses\n2.Drop courses\n");
-		int choice = sc.nextInt();
-		switch (choice) {
+	private static int studentFunctions() {
+		sc = new Scanner(System.in);
+		System.out.print("Welcome student!\nSelect options:\n1.View/Edit Profile\n"
+				+ "2.View Courses/Drop courses\n3.View Pending courses\n"
+				+ "4.View Grades\n5.View/Pay bill\n6.Logout\nEnter Choice:");
+		int key = sc.nextInt();
+		switch (key) {
 		case 1:
-			enrollCourse();
+			while (true) {
+				if (StudentViewProfile() == 1)
+					break;
+			}
 			break;
-
 		case 2:
-			dropCourse();
+			while (true) {
+				if (StudentEnrollViewDropCourse() == 1)
+					break;
+			}
 			break;
-
 		case 3:
+			while (true) {
+				if (StudentViewPendingCourse() == 1)
+					break;
+			}
+			break;
+		case 4:
+			while (true) {
+				if (StudentViewGradesGPA() == 1)
+					break;
+			}
+			break;
+		case 5:
+			while (true) {
+				if (StudentViewPayBills() == 1)
+					break;
+			}
+			break;
+		case 6:
+			return 1;
 		default:
+			System.out.println("Invalid option selected. Please try again!");
 			break;
 		}
+		return 0;
+	}
+
+	private static int StudentViewProfile() {
+		sc = new Scanner(System.in);
+		dbhandler.StudentViewProfile(username);
+		int key = sc.nextInt();
+		switch (key) {
+		case 1:
+			System.out.print("\nEnter First Name: ");
+			String fname = sc.next();
+			dbhandler.StudentEditFirstName(username, fname);
+			break;
+		case 2:
+			System.out.print("\nEnter Last Name: ");
+			String lname = sc.next();
+			dbhandler.StudentEditLastName(username, lname);
+			break;
+		case 3:
+			System.out.print("\nEnter email: ");
+			String email = sc.next();
+			dbhandler.StudentEditEmail(username, email);
+			break;
+		case 4:
+			System.out.print("\nEnter phone: ");
+			String phone = sc.next();
+			dbhandler.StudentEditPhone(username, phone);
+			break;
+		case 5:
+			System.out.print("\nYou don't have permission to edit this field");
+			break;
+		case 6:
+			System.out.print("\nYou don't have permission to edit this field");
+			break;
+		case 0:
+			return 1;
+		}
+		return 0;
+	}
+
+	private static int StudentEnrollViewDropCourse() {
+		return 0;
+	}
+
+	private static int StudentViewPendingCourse() {
+		return 0;
+	}
+
+	private static int StudentViewGradesGPA() {
+		sc = new Scanner(System.in);
+		System.out.print("\n1.Display letter grades\n2.Display GPA\nPress 0 to go back\nEnter choice:");
+		int key = sc.nextInt();
+		switch (key) {
+		case 1:
+			dbhandler.StudentViewGrades(username);
+			break;
+		case 2:
+			dbhandler.StudentViewGPA(username);
+			break;
+		case 0:
+			return 1;
+		}
+		return 0;
+	}
+
+	private static int StudentViewPayBills() {
+		sc = new Scanner(System.in);
+		System.out.print("\n1.Display balance\n2.Pay bills\nPress 0 to go back\nEnter choice:");
+		int key = sc.nextInt();
+		switch (key) {
+		case 1:
+			dbhandler.StudentViewBill(username);
+			break;
+		case 2:
+			dbhandler.StudentPayBill(username);
+			break;
+		case 0:
+			return 1;
+		}
+		return 0;
 	}
 
 	private static void enrollCourse() {
