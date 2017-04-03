@@ -24,6 +24,7 @@ public class Controller {
 			break;
 		case 2:
 			dbhandler.close();
+			System.out.println("System terminated!");
 			System.exit(0);
 		default:
 			break;
