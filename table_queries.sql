@@ -57,8 +57,8 @@ create table semester(
 	sem varchar(3), --eg F16 for fall 2016
 	year int NOT NULL,
 	term varchar(10) NOT NULL,
-	addDeadline date,
-	dropDeadline date,
+	addDeadline date DEFAULT NULL,,
+	dropDeadline date DEFAULT NULL,,
 	primary key (sem)
 	);
 
@@ -132,10 +132,12 @@ create table specialPermission(
 	sem varchar(3),
 	reqDate date,
 	approveDate date DEFAULT NULL,
+	approveStatus char(1) DEFAULT NULL,
 	foreign key (student_id) REFERENCES student,
 	foreign key (username) REFERENCES admin,
 	foreign key (course_id,sem) REFERENCES offering,
-	primary key (student_id,course_id,sem)
+	primary key (student_id,course_id,sem),
+	constraint approvestatus_check check (approveStatus in ('Y','N'))
 	);
 
 create table enrolled(

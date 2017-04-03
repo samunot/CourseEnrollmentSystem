@@ -447,10 +447,11 @@ public class DatabaseHandler {
 			int n = sc.nextInt();
 			int[] faculty = new int[n];
 			for (int i = 0; i < faculty.length; i++) {
+				System.out.println("Enter FacultyID");
 				faculty[i] = sc.nextInt();
 			}
 			System.out.print("Enter schedule(eg M W 11:00PM-12:00PM): ");
-			String schedule = sc.next();
+			String schedule = sc.nextLine();
 			System.out.print("Enter class size: ");
 			int csize = sc.nextInt();
 			System.out.print("Enter wait list size: ");

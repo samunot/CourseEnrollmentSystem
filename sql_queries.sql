@@ -114,12 +114,12 @@ insert into studentDepartment values('CSC',104);
 insert into prereq values('CSC441','CSC541','B',3);
 
 insert into prereq (coursePrereq_id,course_id)values('CSC401','CSC402');
-insert into prereq values('CSC521','CSC520','B+',3.5);
+insert into prereq values('CSC520','CSC521','B+');
 insert into prereq (coursePrereq_id,course_id)values('CSC515','CSC530');
 insert into prereq (coursePrereq_id,course_id)values('CE420','CE421');
 
 --specialPermission
-insert into specialPermission values(2222,'CSC541','rjain','S17','01-11-2017','01-18-2017');
+insert into specialPermission (student_id,course_id,username,sem,reqdate)values(2222,'CSC541','rjain','S17','01-11-2017');
 
 --enrolled
 insert into enrolled values(1111,'CSC505','F16','A',4,3,0,'Y');
@@ -134,6 +134,10 @@ insert into enrolled (student_id,course_id,sem,grade,coursecredits,enrolledstatu
 insert into enrolled (student_id,course_id,sem,grade,coursecredits,enrolledstatus)values(104,'CSC510','F16','A',3,'Y');
 insert into enrolled (student_id,course_id,sem,grade,coursecredits,enrolledstatus)values(104,'CSC515','F16','B+',3,'Y');
 insert into enrolled (student_id,course_id,sem,grade,coursecredits,enrolledstatus)values(104,'CSC525','F16','A+',3,'Y');
+
+--facultyOffering
+
+insert into facultyOffering values()
 
 
 
@@ -168,3 +172,13 @@ from users u , student s where s.student_id = 1111 and s.username = u.username;
 update course
 set mingpa=3.5 
 where course_id = 'CSC521';
+
+select (sum(g.pointsperhour*e.coursecredits)/sum(e.coursecredits)) as GPA
+from enrolled e, gradingsystem g
+where e.student_id=103 and e.grade = g.grade;
+DIV
+select sum(e.coursecredits)
+from enrolled e, gradingsystem g
+where e.student_id=102 and e.grade = g.grade;
+
+delete from enrolled where waitlistNumber > 0;
