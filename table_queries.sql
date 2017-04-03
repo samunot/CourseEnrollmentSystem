@@ -53,7 +53,7 @@ create table faculty(
 	);
 
 create table semester(
-	sem varchar(3),
+	sem varchar(3), --eg F16 for fall 2016
 	year int NOT NULL,
 	term varchar(10) NOT NULL,
 	addDeadline date,
@@ -64,17 +64,15 @@ create table semester(
 create table course(
 	title varchar(50) NOT NULL UNIQUE,
 	course_id varchar(20),
-	username int,
 	gradLevel int NOT NULL,
-	credits int NOT NULL,
+	credits varchar(3) NOT NULL,
 	permission char(1) NOT NULL,
 	primary key (course_id),
-	foreign key (username) REFERENCES admin,
 	constraint perm_check check (permission in ('Y','N')),
-	constraint gradlevel_check check(gradLevel in (1,2))
+	constraint gradlevel2_check check(gradLevel in (1,2))
 	);
 
-	create table department(
+create table department(
 	department_id varchar(20),
 	name varchar(40),
 	primary key (department_id)
@@ -97,7 +95,7 @@ create table offering(
 	foreign key (sem) REFERENCES semester,
 	primary key (course_id,sem),
 	constraint waitlist_check check(maxWaitist>=studentsWaitlisted),
-	constraint size_check check(maxSize>=studentsEnrolled),
+	constraint size_check check(maxSize>=studentsEnrolled)
 	);
 
 create table departmentCourse(
@@ -129,7 +127,7 @@ create table prereq(
 create table specialPermission(
 	student_id int,
 	course_id varchar(20),
-	username int,
+	username varchar(20),
 	sem varchar(3),
 	reqDate date,
 	approveDate date,
