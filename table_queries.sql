@@ -20,6 +20,7 @@ create table users(
 create table admin(
 	username varchar(20),
 	ssn int NOT NULL UNIQUE,
+	employee_id int,
 	foreign key (username) REFERENCES users,
 	primary key (username)
 	);
