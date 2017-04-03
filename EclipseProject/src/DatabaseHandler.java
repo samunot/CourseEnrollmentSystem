@@ -1,12 +1,9 @@
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
@@ -245,9 +242,11 @@ public class DatabaseHandler {
 			return;
 		case 1:
 			viewCourse();
+			viewAddCourse();
 			break;
 		case 2:
 			addCourse();
+			viewAddCourse();
 			break;
 		default:
 			System.out.println("Invalid choice. Please try again!");
@@ -292,9 +291,10 @@ public class DatabaseHandler {
 
 	public void addCourse() {
 		try {
+			sc = new Scanner(System.in);
 			System.out.print("Enter Course ID: ");
 			String courseid = sc.nextLine();
-			System.out.print("Enter Course Name: ");
+			System.out.println("Enter Course Name: ");
 			String title = sc.nextLine();
 			System.out.print("Enter Department ID: ");
 			String depid = sc.nextLine();
@@ -309,12 +309,16 @@ public class DatabaseHandler {
 			if (pr > 0) {
 				System.out.print("Enter prerequisite course IDs: ");
 				for (int i = 0; i < prereq.length; i++) {
-					prereq[i] = sc.nextLine();
+					prereq[i] = sc.next();
 				}
 			}
 
 			System.out.print("Special Approval Required(Y/N): ");
 			String perm = sc.next();
+			if (perm.equalsIgnoreCase("y"))
+				perm = "Y";
+			else
+				perm = "N";
 			System.out.print("Are there variable number of credits?(y/n): ");
 			String yes = sc.next();
 			String credits;
@@ -337,11 +341,11 @@ public class DatabaseHandler {
 			state.setString(5, perm);
 			state.setFloat(6, mingpa);
 			state.executeUpdate();
-			state = con.prepareStatement("Insert into departmentcourse (DEPARTMENT_ID, Course_ID) values()");
+			state = con.prepareStatement("Insert into departmentcourse (DEPARTMENT_ID, Course_ID) values(?,?)");
 			state.setString(1, depid);
 			state.setString(2, courseid);
 			state.executeUpdate();
-			state = con.prepareStatement("Insert into prereq (courseprereq_id, course id)");
+			state = con.prepareStatement("Insert into prereq (courseprereq_id, course_id) values(?,?)");
 			state.setString(2, courseid);
 			for (int i = 0; i < prereq.length; i++) {
 				state.setString(1, prereq[i]);
@@ -350,7 +354,8 @@ public class DatabaseHandler {
 			System.out.println("Course Successfully added!");
 		} catch (Exception e) {
 			// TODO: handle exception
-			e.printStackTrace();
+			System.out.println("Invalid Value/s. Please try again!");
+			addCourse();
 		}
 	}
 
@@ -380,7 +385,7 @@ public class DatabaseHandler {
 			state = con.prepareStatement("Update users set firstname=? where username=?");
 			state.setString(1, name);
 			state.setString(2, username);
-			ResultSet rs = state.executeQuery();
+			state.executeQuery();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -391,7 +396,7 @@ public class DatabaseHandler {
 			state = con.prepareStatement("Update users set lastname=? where username=?");
 			state.setString(1, name);
 			state.setString(2, username);
-			ResultSet rs = state.executeQuery();
+			state.executeQuery();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -402,7 +407,7 @@ public class DatabaseHandler {
 			state = con.prepareStatement("Update student set email=? where username=?");
 			state.setString(1, email);
 			state.setString(2, username);
-			ResultSet rs = state.executeQuery();
+			state.executeQuery();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -413,7 +418,7 @@ public class DatabaseHandler {
 			state = con.prepareStatement("Update users set phone=? where username=?");
 			state.setString(1, phone);
 			state.setString(2, username);
-			ResultSet rs = state.executeQuery();
+			state.executeQuery();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -480,7 +485,7 @@ public class DatabaseHandler {
 					state = con.prepareStatement("update student set tuitionowed=tuitionowed-? where username=?");
 					state.setFloat(1, amount);
 					state.setString(2, username);
-					ResultSet rs1 = state.executeQuery();
+					state.executeQuery();
 					System.out.print("\nYou have successfully paid " + amount + " amount.");
 				} else
 					System.out.print("\nThe payment amount exceeds the owed bill. Please choose a smaller amount.");
