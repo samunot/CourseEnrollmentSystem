@@ -154,8 +154,8 @@ create table enrolled(
 	);
 
 create table costAndLimit(
-	educationlevel varchar(20) ,
-	residency varchar(20) ,
+	educationlevel int ,
+	residency int ,
 	minCredit int,
 	maxCredit int,
 	costPerCredit int,
