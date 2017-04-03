@@ -71,7 +71,7 @@ public class Controller {
 			adminFunctions();
 			break;
 		case 5:
-			dbhandler.viewAddCourse();
+			dbhandler.viewAddOffering();
 			adminFunctions();
 			break;
 		case 6:
@@ -206,14 +206,14 @@ public class Controller {
 		}
 		return 0;
 	}
-
-	private static int StudentEnrollViewDropCourse() {
-		sc = new Scanner(System.in);
+	
+	private static int StudentEnrollViewDropCourse(){
+		sc=new Scanner(System.in);
 		System.out.print("\n1.View Available Courses\n2. View My Courses\nPress 0 to go back.\nEnter Choice:");
-		int key = sc.nextInt();
-		switch (key) {
+		int key=sc.nextInt();
+		switch(key){
 		case 1:
-			dbhandler.StudentViewAvailableCourse(username);
+			dbhandler.StudentViewAvailableCourse(username);		
 			break;
 		case 2:
 			dbhandler.StudentViewMyCourses(username);
@@ -223,15 +223,14 @@ public class Controller {
 		}
 		return 0;
 	}
-
+	
 	private static int StudentViewPendingCourse() {
-		sc = new Scanner(System.in);
+		sc=new Scanner(System.in);
 		dbhandler.StudentViewPendingCourse(username);
 		System.out.print("\nPress 0 to go back.");
-		int key = sc.nextInt();
-		if (key == 0)
+		int key=sc.nextInt();
+		if(key==0)
 			return 1;
-		else
-			return 0;
-	}
+		else return 0;
+	}	
 }

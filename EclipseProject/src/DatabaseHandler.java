@@ -368,11 +368,11 @@ public class DatabaseHandler {
 			return;
 		case 1:
 			viewOffering();
-			viewAddCourse();
+			viewAddOffering();
 			break;
 		case 2:
 			addOffering();
-			viewAddCourse();
+			viewAddOffering();
 			break;
 		default:
 			System.out.println("Invalid choice. Please try again!");
