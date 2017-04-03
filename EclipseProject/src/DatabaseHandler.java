@@ -359,6 +359,199 @@ public class DatabaseHandler {
 		}
 	}
 
+	public void viewAddOffering() {
+		System.out.println(
+				"Select Appropriate Menu Option:\n0.Go Back To Previous Menu\n1.View Course Offerings\n2.Add New Course Offering");
+		int key = sc.nextInt();
+		switch (key) {
+		case 0:
+			return;
+		case 1:
+			viewOffering();
+			viewAddCourse();
+			break;
+		case 2:
+			addOffering();
+			viewAddCourse();
+			break;
+		default:
+			System.out.println("Invalid choice. Please try again!");
+			viewAddOffering();
+			break;
+		}
+	}
+
+	public void viewOffering() {
+		try {
+			System.out.print("Enter Course ID: ");
+			String courseid = sc.next();
+			System.out.println("Enter Semester: ");
+			String sem = sc.next();
+			state = con.prepareStatement(
+					"Select schedule, maxsize, maxwaitist from offering where course_id = ? and sem = ?");
+			state.setString(1, courseid);
+			state.setString(2, sem);
+			ResultSet rs = state.executeQuery();
+			if (rs.next()) {
+				System.out.println("Schedule: " + rs.getString(1));
+				System.out.println("Class size: " + rs.getInt(2));
+				System.out.println("Waitlist size:" + rs.getInt(3));
+				state = con.prepareStatement(
+						"Select firstname, lastname from users where username in (Select username from faculty where faculty_id in (Select faculty_id from facultyoffering where course_id = ? and sem = ?))");
+				state.setString(1, courseid);
+				state.setString(2, sem);
+				rs = state.executeQuery();
+				System.out.println("Faculty Name/s: ");
+				while (rs != null && rs.next()) {
+					System.out.println(rs.getString(1) + " " + rs.getString(2));
+				}
+			} else {
+				System.out.println("Invalid values. Please try again!");
+				viewOffering();
+			}
+			System.out.println("Press 0 to go back");
+			int key = sc.nextInt();
+			while (key != 0) {
+				System.out.println("Invalid Option");
+				key = sc.nextInt();
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			System.out.println("Invalid values. Please try again!");
+			viewOffering();
+		}
+	}
+
+	public void addOffering() {
+		try {
+			System.out.print("Enter course ID: ");
+			String courseid = sc.next();
+			System.out.print("Enter Semester(eg. S17 for Spring 2017): ");
+			String sem = sc.next();
+			System.out.println("Enter number of faculty members: ");
+			int n = sc.nextInt();
+			int[] faculty = new int[n];
+			for (int i = 0; i < faculty.length; i++) {
+				faculty[i] = sc.nextInt();
+			}
+			System.out.print("Enter schedule(eg M W 11:00PM-12:00PM): ");
+			String schedule = sc.next();
+			System.out.print("Enter class size: ");
+			int csize = sc.nextInt();
+			System.out.print("Enter wait list size: ");
+			int wsize = sc.nextInt();
+			
+			state = con.prepareStatement("Insert into offering(course_id, sem, schedule, maxsize, maxwaitist) values (?,?,?,?,?)");
+			state.setString(1, courseid);
+			state.setString(2, sem);
+			state.setString(3, schedule);
+			state.setInt(4, csize);
+			state.setInt(5, wsize);
+			state.executeQuery();
+			
+			state = con.prepareStatement("Insert into facultyoffering values(course_id, sem, faculty_id) values(?,?,?)");
+			state.setString(1, courseid);
+			state.setString(2, sem);
+			for (int i = 0; i < faculty.length; i++) {
+				state.setInt(3, faculty[i]);
+				state.executeQuery();
+			}
+			System.out.println("Offering successfully added!");
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println("Invalid values. Please try again!");
+			e.printStackTrace();
+			addOffering();
+		}
+	}
+
+	public void viewApprovePermisiion() {
+		try {
+			System.out.println("List of pending requests:");
+			state = con.prepareStatement(
+					"select student_id, course_id, sem, reqdate from specialpermission where approvedate is NULL");
+			DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
+			ResultSet rs = state.executeQuery();
+			String[] specialperm = new String[rs.getFetchSize()];
+			int i = 0;
+			System.out.println("  student_id\tcourse_id\tsem\treqdate");
+			while (rs.next()) {
+				System.out.println((i + 1) + ". " + rs.getInt(1) + "\t" + rs.getString(2) + "\t" + rs.getString(3)
+						+ "\t" + df.format(rs.getDate(4)));
+				specialperm[i] = rs.getInt(1) + "\t" + rs.getString(2) + "\t" + rs.getString(3);
+				i++;
+			}
+			if (i == 0) {
+				System.out.println("No requests");
+			} else {
+				Date date = new Date(System.currentTimeMillis());
+				System.out.println("Enter choice:");
+				int choice = sc.nextInt();
+				System.out.println("1.Approve Request\n2.Reject request\nEnter choice: ");
+				int status = sc.nextInt();
+				state = con.prepareStatement(
+						"update specialpermission set approvedate = ?, approvestatus = ? where student_id= ? and course_id = ? and sem = ?");
+				state.setDate(1, date);
+				if (status == 1)
+					state.setString(2, "Y");
+				else
+					state.setString(2, "N");
+				state.setInt(3, Integer.parseInt(specialperm[choice - 1].split("\t")[0]));
+				state.setString(4, specialperm[choice - 1].split("\t")[1]);
+				state.setString(5, specialperm[choice - 1].split("\t")[2]);
+				state.executeQuery();
+				System.out.println("Succesfully responded!");
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+
+	public void enforceDeadline() {
+		try {
+			System.out.println("Enforce Deadline:\n1.Yes\n2.No");
+			String key = sc.next();
+			switch (key) {
+			case "Yes":
+				state = con.prepareStatement("select addDeadline from semester where sem='S17'");
+				ResultSet rs = state.executeQuery();
+				rs.next();
+				Date d = rs.getDate(1);
+				if (d == null) {
+					state = con.prepareStatement(
+							"update offering set maxwaitist = 0, studentswaitlisted=0 where sem='S17'");
+					state.executeUpdate();
+					state = con.prepareStatement("update semester set adddeadline = ? where sem='S17'");
+					Date dnow = new Date(System.currentTimeMillis());
+					DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
+					String mydateStr = df.format(dnow);
+					Calendar cal = Calendar.getInstance();
+					cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mydateStr.split("-")[1]));
+					cal.set(Calendar.MONTH, Integer.parseInt(mydateStr.split("-")[0]) - 1);
+					cal.set(Calendar.YEAR, Integer.parseInt(mydateStr.split("-")[2]));
+					state.setDate(1, new Date(cal.getTimeInMillis()));
+					System.out.println(state.executeUpdate());
+					state = con.prepareStatement("delete from enrolled where waitlistNumber > 0");
+					state.executeQuery();
+					System.out.println("Deadline succesfully enforced.");
+				} else
+					System.out.println("Deadline already enforced");
+				break;
+			case "No":
+				return;
+			default:
+				System.out.println("Invalid choice. Please try again!");
+				enforceDeadline();
+				break;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+
 	// Student Functions
 
 	public void StudentViewProfile(String username) {

@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Test {
 
-	public static void special(){
+	public static void main(String[] args){
 		
 		// TODO Auto-generated method stub
 		Connection conn = null;
@@ -18,7 +18,11 @@ public class Test {
 		conn = conOracle.returnConnection();
 		PreparedStatement state = null;
 		Scanner sc = new Scanner(System.in);
+		DatabaseHandler db = new DatabaseHandler();
+		db.enforceDeadline();
 	
 		}
+	
+	
 
 }

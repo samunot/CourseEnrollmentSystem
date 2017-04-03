@@ -70,6 +70,18 @@ public class Controller {
 			dbhandler.viewAddCourse();
 			adminFunctions();
 			break;
+		case 5:
+			dbhandler.viewAddCourse();
+			adminFunctions();
+			break;
+		case 6:
+			dbhandler.viewApprovePermisiion();
+			adminFunctions();
+			break;
+		case 7:
+			dbhandler.enforceDeadline();
+			adminFunctions();
+			return;
 		case 8:
 			loginExit();
 			break;
@@ -201,13 +213,5 @@ public class Controller {
 			return 1;
 		}
 		return 0;
-	}
-
-	private static void enrollCourse() {
-
-	}
-
-	private static void dropCourse() {
-
 	}
 }
