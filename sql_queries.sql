@@ -57,6 +57,24 @@ insert into specialPermission values(2222,'CSC541','rjain','S17','01-11-2017','0
 insert into enrolled values(1111,'CSC505','F16','A',4,3,0,'Y');
 insert into enrolled (student_id,course_id,sem,coursecredits,waitlistNumber,enrolledstatus)values(1111,'CSC541','S17',3,0,'Y');
 
+--costAndLimit
+INSERT into costAndLimit values(2,1,0,9,500);
+INSERT into costAndLimit values(2,2,0,9,800);
+INSERT into costAndLimit values(2,3,9,9,1000);
+INSERT into costAndLimit values(1,1,0,12,400);
+INSERT into costAndLimit values(1,2,0,12,700);
+INSERT into costAndLimit values(1,3,9,12,900);
+
+--gradingSystem
+INSERT into gradingsystem values('A+',4.33);
+INSERT into gradingsystem values('A',4);
+INSERT into gradingsystem values('A-',3.67);
+INSERT into gradingsystem values('B+',3.33);
+INSERT into gradingsystem values('B',3);
+INSERT into gradingsystem values('B-',2.67);
+INSERT into gradingsystem values('C+',2.33);
+INSERT into gradingsystem values('C',2);
+INSERT into gradingsystem values('C-',1.67);
 
 
 --misc
