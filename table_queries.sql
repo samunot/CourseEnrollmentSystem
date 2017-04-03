@@ -131,7 +131,7 @@ create table specialPermission(
 	username varchar(20),
 	sem varchar(3),
 	reqDate date,
-	approveDate date,
+	approveDate date DEFAULT NULL,
 	foreign key (student_id) REFERENCES student,
 	foreign key (username) REFERENCES admin,
 	foreign key (course_id,sem) REFERENCES offering,
@@ -151,6 +151,15 @@ create table enrolled(
 	foreign key (course_id,sem) REFERENCES offering,
 	primary key (student_id,sem,course_id),
 	constraint enrolled_check check (enrolledStatus in ('Y','N'))
+	);
+
+create table facultyOffering(
+	faculty_id int,
+	course_id varchar(20),
+	sem varchar(3),
+	foreign key (faculty_id) REFERENCES faculty,
+	foreign key (course_id,sem) REFERENCES offering,
+	primary key (faculty_id,course_id,sem)
 	);
 
 create table costAndLimit(

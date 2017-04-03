@@ -165,3 +165,6 @@ insert into student values(5555,'abcxyz',null,null,1,null,2300.0,null,null,1,nul
 select u.firstname,u.lastname,u.dob,s.residencylevel,s.gradlevel,s.tuitionowed,s.gpa,u.phone,s.email,u.street,u.city,u.state,u.zip 
 from users u , student s where s.student_id = 1111 and s.username = u.username;
 
+update course
+set mingpa=3.5 
+where course_id = 'CSC521';
