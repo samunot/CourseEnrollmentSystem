@@ -106,11 +106,17 @@ public class DatabaseHandler {
 			state.setFloat(4, amt);
 			state.setInt(5, level);
 			state.execute();
-
+			con.commit();
 			System.out.println("Student enrolled successfully! :)");
 		} catch (Exception e) {
 			// TODO: handle exception
-			e.printStackTrace();
+			try {
+				con.rollback();
+			} catch (Exception ex) {
+				// TODO: handle exception
+				ex.printStackTrace();
+			}
+			System.out.println("Invalid values!");
 		}
 	}
 
@@ -222,6 +228,7 @@ public class DatabaseHandler {
 				state.setString(3, courseid[choice]);
 				if (state.executeUpdate() >= 1) {
 					System.out.println("Grade successfully entered!");
+					con.commit();
 				} else {
 					System.out.println("Failed!");
 				}
@@ -288,12 +295,14 @@ public class DatabaseHandler {
 			e.printStackTrace();
 			System.out.println("Invalid values! Press 0 to go back or 1 to retry");
 			int choice = sc.nextInt();
-			while(!(choice==0 || choice==1)){
+			while (!(choice == 0 || choice == 1)) {
 				System.out.println("Please enter valid option");
 				choice = sc.nextInt();
 			}
-			if(choice==1)	viewCourse();
-			else return;
+			if (choice == 1)
+				viewCourse();
+			else
+				return;
 		}
 	}
 
@@ -359,9 +368,16 @@ public class DatabaseHandler {
 				state.setString(1, prereq[i]);
 				state.executeUpdate();
 			}
+			con.commit();
 			System.out.println("Course Successfully added!");
 		} catch (Exception e) {
 			// TODO: handle exception
+			try {
+				con.rollback();
+			} catch (Exception ex) {
+				// TODO: handle exception
+				ex.printStackTrace();
+			}
 			System.out.println("Invalid Value/s. Please try again!");
 			addCourse();
 		}
@@ -428,12 +444,14 @@ public class DatabaseHandler {
 			e.printStackTrace();
 			System.out.println("Invalid values! Press 0 to go back or 1 to retry");
 			int choice = sc.nextInt();
-			while(!(choice==0 || choice==1)){
+			while (!(choice == 0 || choice == 1)) {
 				System.out.println("Please enter valid option");
 				choice = sc.nextInt();
 			}
-			if(choice==1)	viewOffering();
-			else return;
+			if (choice == 1)
+				viewOffering();
+			else
+				return;
 		}
 	}
 
@@ -443,20 +461,20 @@ public class DatabaseHandler {
 			String courseid = sc.next();
 			System.out.print("Enter Semester(eg. S17 for Spring 2017): ");
 			String sem = sc.next();
-			System.out.println("Enter number of faculty members: ");
+			System.out.print("Enter number of faculty members: ");
 			int n = sc.nextInt();
 			int[] faculty = new int[n];
 			for (int i = 0; i < faculty.length; i++) {
-				System.out.println("Enter FacultyID");
+				System.out.print("Enter FacultyID:");
 				faculty[i] = sc.nextInt();
 			}
-			System.out.print("Enter schedule(eg M W 11:00PM-12:00PM): ");
+			sc.nextLine();
+			System.out.println("Enter schedule(eg M W 11:00PM-12:00PM): ");
 			String schedule = sc.nextLine();
 			System.out.print("Enter class size: ");
 			int csize = sc.nextInt();
 			System.out.print("Enter wait list size: ");
 			int wsize = sc.nextInt();
-
 			state = con.prepareStatement(
 					"Insert into offering(course_id, sem, schedule, maxsize, maxwaitist) values (?,?,?,?,?)");
 			state.setString(1, courseid);
@@ -465,20 +483,24 @@ public class DatabaseHandler {
 			state.setInt(4, csize);
 			state.setInt(5, wsize);
 			state.executeQuery();
-
-			state = con
-					.prepareStatement("Insert into facultyoffering values(course_id, sem, faculty_id) values(?,?,?)");
+			state = con.prepareStatement("Insert into facultyoffering (course_id, sem, faculty_id) values(?,?,?)");
 			state.setString(1, courseid);
 			state.setString(2, sem);
 			for (int i = 0; i < faculty.length; i++) {
 				state.setInt(3, faculty[i]);
 				state.executeQuery();
 			}
+			con.commit();
 			System.out.println("Offering successfully added!");
 		} catch (Exception e) {
 			// TODO: handle exception
+			try {
+				con.rollback();
+			} catch (Exception ex) {
+				// TODO: handle exception
+				ex.printStackTrace();
+			}
 			System.out.println("Invalid values. Please try again!");
-			e.printStackTrace();
 			addOffering();
 		}
 	}
@@ -518,6 +540,7 @@ public class DatabaseHandler {
 				state.setString(4, specialperm[choice - 1].split("\t")[1]);
 				state.setString(5, specialperm[choice - 1].split("\t")[2]);
 				state.executeQuery();
+				con.commit();
 				System.out.println("Succesfully responded!");
 			}
 		} catch (Exception e) {
@@ -596,6 +619,7 @@ public class DatabaseHandler {
 			state.setString(1, name);
 			state.setString(2, username);
 			state.executeQuery();
+			con.commit();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -607,6 +631,7 @@ public class DatabaseHandler {
 			state.setString(1, name);
 			state.setString(2, username);
 			state.executeQuery();
+			con.commit();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -618,6 +643,7 @@ public class DatabaseHandler {
 			state.setString(1, email);
 			state.setString(2, username);
 			state.executeQuery();
+			con.commit();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -629,6 +655,7 @@ public class DatabaseHandler {
 			state.setString(1, phone);
 			state.setString(2, username);
 			state.executeQuery();
+			con.commit();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -739,6 +766,7 @@ public class DatabaseHandler {
 					state.setFloat(1, amount);
 					state.setString(2, username);
 					state.executeQuery();
+					con.commit();
 					System.out.print("\nYou have successfully paid " + amount + " amount.");
 				} else
 					System.out.print("\nThe payment amount exceeds the owed bill. Please choose a smaller amount.");
@@ -784,14 +812,14 @@ public class DatabaseHandler {
 				state = con.prepareStatement(
 						"select count(*) from prereq where courseprereq_id not in (select e.course_id from e.enrolled,s.student where s.student_id=e.student_id and s.username=? and e.course_id=?)");
 				state.setString(1, username);
-				state.setString(2, course[id]);
+				state.setString(2, course[id - 1]);
 				ResultSet rs1 = state.executeQuery();
 				if (rs1.next()) {
 					if (rs1.getInt(1) > 0) {
 						System.out.println("You can't enroll since prequisite course/s is not taken.");
 					}
 				} else {
-					state = con.prepareStatement("insert into enroll values()");
+					state = con.prepareStatement("Select mingpa from course");
 				}
 
 			} else
@@ -807,6 +835,7 @@ public class DatabaseHandler {
 		try {
 			if (state != null)
 				state.close();
+			con.commit();
 			con.close();
 			conOracle.close();
 		} catch (Exception e) {
