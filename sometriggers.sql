@@ -109,50 +109,66 @@ SET gpa = s_gpa
 END;
 /
 
-
+/*
 SELECT (sum(g.pointsperhour*e.coursecredits)/sum(e.coursecredits)) AS gpa
 FROM enrolled e, gradingsystem g
 WHERE e.student_id=1111 and e.grade=g.grade;
+*/
 
-/*
 ---When someone enrolls increment studentsEnrolled by 1
 CREATE OR REPLACE TRIGGER increment_studentsEnrolled
 BEFORE INSERT OR UPDATE OF ENROLLEDSTATUS ON ENROLLED
 FOR EACH ROW
 DECLARE
 BEGIN
-    UPDATE OFFERING
+if (:new.enrolledstatus='Y')
+    THEN UPDATE OFFERING
     SET studentsEnrolled=studentsEnrolled+1
-    WHERE course_id=:new.course_id and sem=:new.sem and :new.enrolledStatus='Y';
-
+    WHERE course_id=:new.course_id and sem=:new.sem ;
+end if;
    END;
 /
 
+
+---When someone drops decrement studentsEnrolled by 1
+CREATE OR REPLACE TRIGGER decrement_studentsEnrolled
+BEFORE INSERT OR UPDATE OF ENROLLEDSTATUS ON ENROLLED
+FOR EACH ROW
+DECLARE
+BEGIN
+    if (:old.enrolledstatus='Y' and :new.enrolledstatus='N' )
+    THEN UPDATE OFFERING
+    SET studentsEnrolled=studentsEnrolled-1
+    WHERE course_id=:new.course_id and sem=:new.sem ;
+    end if;
+   END;
+/
 
 --When someone gets into waitlist, increment studentswaitlisted by 1
 CREATE OR REPLACE TRIGGER increment_studentsWaitlisted
 BEFORE INSERT ON ENROLLED
 FOR EACH ROW
 DECLARE
-s_num  offering.studentsWaitlisted;
+s_num  offering.studentsWaitlisted%type;
 
 BEGIN
 SELECT COUNT(*) INTO s_num
 FROM enrolled
-WHERE course_id=:new.course_id and sem=:new.sem and :new.enrolledstatus = 'N' and 
+WHERE course_id=:new.course_id and sem=:new.sem and :new.enrolledstatus = 'N' and :new.waitlistNumber>0;
+    
     UPDATE OFFERING
-    SET studentswaitlisted=studentsWaitlisted+s_num;
-    WHERE course_id=:new.course_id and sem=:new.sem and :new.enrolledStatus='Y' and :new.waitlistNumber >0;
+    SET studentswaitlisted=s_num;
+    WHERE course_id=:new.course_id and sem=:new.sem;
    END;
 /
 
-*/
+
 
 --When someone drops the course
 
 
 ----Approving specialpermssion to enroll
-CREATE OR REPLACE TRIGGER special_permission_enrollment
+/*CREATE OR REPLACE TRIGGER special_permission_enrollment
 BEFORE UPDATE OF APPROVESTATUS ON SPECIALPERMISSION
 FOR EACH ROW
 DECLARE
