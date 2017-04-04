@@ -14,7 +14,6 @@ create table users(
 	state varchar(20),
 	primary key (username),
 	constraint zip_check check (zip>=0 AND zip<100000),
-	constraint phone_check check (phone>=100000000 AND phone<1000000000),
 	constraint role_check check(role in ('student','admin','faculty'))
 	);
 
@@ -43,8 +42,9 @@ create table student(
 	constraint hasGraduated_check check (hasGraduated in ('Y','N')),
 	constraint level_check check(residencyLevel in (1,2,3)),
 	constraint gradlevel_check check(gradLevel in (1,2)),
-	constraint gpa_check check(gpa<=4.33)
+	constraint gpa_check check(GPA<=4.33)
 	);
+
 
 create table faculty(
 	faculty_id int,
@@ -144,7 +144,7 @@ create table enrolled(
 	sem varchar(3),
 	grade varchar(2),
 	courseCredits int, 
-	waitlistNumber int,
+	waitlistNumber int DEFAULT 0,
 	enrolledStatus char(1) NOT NULL,
 	foreign key (student_id) REFERENCES student,
 	foreign key (course_id,sem) REFERENCES offering,
@@ -176,21 +176,3 @@ create table gradingSystem(
 	primary key(grade)
 	);
 
-drop table departmentCourse;
-drop table studentDepartment;
-drop table prereq;
-drop table specialpermission;
-drop table createCourse;
-drop table enrolled;
-drop table costandlimit;
-drop table gradingsystem;
-drop table sem;
-
-
-drop table term;
-drop table department;
-drop table course;
-drop table faculty;
-drop table admin;
-drop table student;
-drop table users;

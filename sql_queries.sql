@@ -57,6 +57,7 @@ insert into course values('Internet Protocols','CSC520',2,'3','N');
 insert into course values('VLSI','CE420',1,'3','N');
 insert into course values('Independent Study','CSC525',2,'1-3','Y'); --delete this first
 insert into course values('Numerical Methods','CSC402',1,'3','Y');
+insert into course values('Algorithms','CSC505',2,'3','N');
 insert into course values('Cloud Computing','CSC521',2,'3','Y');
 insert into course values('Dev-Ops','CSC530',2,'3','Y');
 insert into course values('VLSI II','CE421',1,'3','Y');
@@ -182,3 +183,5 @@ from enrolled e, gradingsystem g
 where e.student_id=102 and e.grade = g.grade;
 
 delete from enrolled where waitlistNumber > 0;
+
+	Insert into offering(course_id, sem, schedule, maxsize, maxwaitist) values ('CSC506','S17','M W 4-5',5,2);
