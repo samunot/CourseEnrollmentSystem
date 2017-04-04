@@ -819,7 +819,40 @@ public class DatabaseHandler {
 						System.out.println("You can't enroll since prequisite course/s is not taken.");
 					}
 				} else {
-					state = con.prepareStatement("Select mingpa from course");
+					state = con.prepareStatement("Select credits from course where course_id = ?");
+					state.setString(1, course[id - 1]);
+					rs = state.executeQuery();
+					rs.next();
+					String credit = rs.getString(1);
+					state = con.prepareStatement("Select student_id where username = ?");
+					state.setString(1, username);
+					rs = state.executeQuery();
+					int studentid = rs.getInt(1);
+					state = con.prepareStatement("Select mingpa from course where course_id = ?");
+					state.setString(1, course[id - 1]);
+					rs = state.executeQuery();
+
+					if (!rs.next()) {
+
+						enroll(studentid, course[id - 1], "S17", credit);
+					} else {
+						float mingpa = rs.getFloat(1);
+						state = con.prepareStatement("Select gpa from student where username = ?");
+						state.setString(1, username);
+						rs = state.executeQuery();
+						if (rs.next()) {
+
+							if (rs.getFloat(1) < mingpa) {
+								System.out.println("You can't enroll since minimum gpa requirement is not met.");
+							} else {
+								enroll(studentid, course[id - 1], "S17", credit);
+							}
+
+							System.out.println("You can't enroll since minimum gpa requirement is not met.");
+						} else {
+							System.out.println("You can't enroll since minimum gpa requirement is not met.");
+						}
+					}
 				}
 
 			} else
@@ -827,6 +860,41 @@ public class DatabaseHandler {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	public void enroll(int studentid, String courseid, String sem, String credits) {try{
+			state = con.prepareStatement("select maxsize, studentsenrolled, studentswaitlisted from offering where course_id = ? and sem = ?");
+			state.setString(1, courseid);
+			state.setString(2, sem);
+			ResultSet rs = state.executeQuery();
+			rs.next();
+			int size = rs.getInt(1);
+			int enrolled = rs.getInt(2);
+			int waitlist = rs.getInt(3);
+			boolean available = (size>enrolled)? true:false;
+			
+			state = con.prepareStatement("insert into enrolled (student_id, course_id, sem, coursecredits, waitlistnumber, enrolledstatus) values (?,?,?,?,?,?)");
+			state.setInt(1, studentid);
+			state.setString(2, courseid);
+			state.setString(3, sem);
+			state.setString(4, credits);
+			if(available){
+				state.setInt(5, 0);
+				state.setString(6, "Y");
+			}
+			else{
+				state.setInt(5, waitlist+1);
+				state.setString(6, "N");
+			}
+			state.executeQuery();
+			con.commit();
+			System.out.println("Successfully enrolled!");
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println("Enrollment failed!");
+			e.printStackTrace();
+
 		}
 	}
 
