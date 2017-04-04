@@ -14,6 +14,7 @@ create table users(
 	state varchar(20),
 	primary key (username),
 	constraint zip_check check (zip>=0 AND zip<100000),
+	constraint phone_check check (phone>=100000000 AND phone<1000000000),
 	constraint role_check check(role in ('student','admin','faculty'))
 	);
 
@@ -31,7 +32,6 @@ create table student(
 	gpa float,
 	termEnrolled varchar(10),
 	residencyLevel int NOT NULL,
-	tuitionBill float,
 	tuitionOwed float,
 	minCredit int,
 	maxCredit int,
@@ -42,9 +42,9 @@ create table student(
 	primary key (student_id),
 	constraint hasGraduated_check check (hasGraduated in ('Y','N')),
 	constraint level_check check(residencyLevel in (1,2,3)),
-	constraint gradlevel_check check(gradLevel in (1,2))
+	constraint gradlevel_check check(gradLevel in (1,2)),
+	constraint gpa_check check(gpa<=4.33)
 	);
-
 
 create table faculty(
 	faculty_id int,
@@ -57,8 +57,8 @@ create table semester(
 	sem varchar(3), --eg F16 for fall 2016
 	year int NOT NULL,
 	term varchar(10) NOT NULL,
-	addDeadline date DEFAULT NULL,,
-	dropDeadline date DEFAULT NULL,,
+	addDeadline date DEFAULT NULL,
+	dropDeadline date DEFAULT NULL,
 	primary key (sem)
 	);
 
@@ -66,6 +66,7 @@ create table course(
 	title varchar(50) NOT NULL UNIQUE,
 	course_id varchar(20),
 	gradLevel int NOT NULL,
+	minGPA float,
 	credits varchar(3) NOT NULL,
 	permission char(1) NOT NULL,
 	primary key (course_id),
@@ -82,7 +83,6 @@ create table department(
 create table offering(
 	course_id varchar(20),
 	department_id varchar(20),
-	faculty_id int,
 	sem varchar(3),
 	maxWaitist int,
 	maxSize int,
@@ -90,7 +90,6 @@ create table offering(
 	studentsEnrolled int,
 	studentsWaitlisted int,
 	schedule varchar(20),
-	foreign key (faculty_id) REFERENCES faculty,
 	foreign key (course_id) REFERENCES course,
 	foreign key (department_id) REFERENCES department,
 	foreign key (sem) REFERENCES semester,
@@ -119,7 +118,6 @@ create table prereq(
 	coursePrereq_id varchar(20),
 	course_id varchar(20),
 	minGrade varchar(2),
-	minGPA float,
 	foreign key (coursePrereq_id) REFERENCES course,
 	foreign key (course_id) REFERENCES course,
 	primary key (coursePrereq_id,course_id)
@@ -145,7 +143,6 @@ create table enrolled(
 	course_id varchar(20),
 	sem varchar(3),
 	grade varchar(2),
-	gpa float,
 	courseCredits int, 
 	waitlistNumber int,
 	enrolledStatus char(1) NOT NULL,
