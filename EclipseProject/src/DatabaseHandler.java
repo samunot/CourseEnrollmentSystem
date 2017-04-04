@@ -795,8 +795,8 @@ public class DatabaseHandler {
 	public void StudentViewAvailableCourse(String username) {
 		try {
 			sc = new Scanner(System.in);
-			state = con.prepareStatement(
-					"select o1.course_id from offering o1 where o1.sem='S17' AND o1.maxsize>o1.studentsenrolled union(select o2.course_id from offering o2 where o2.sem='S17' AND o2.maxsize=o2.studentsenrolled AND o2.maxwaitist>o2.studentswaitlisted)");
+			state = con.prepareStatement("select o1.course_id from offering o1 where o1.sem='S17' AND o1.maxsize>o1.studentsenrolled union select o2.course_id from offering o2 where o2.sem='S17' AND o2.maxsize=o2.studentsenrolled AND o2.maxwaitist>o2.studentswaitlisted MINUS select course_id from enrolled e where e.student_id in (select student_id from student where username = ?)");
+			state.setString(1, username);
 			ResultSet rs = state.executeQuery();
 			if (rs.isBeforeFirst()) {
 				System.out.println("Available courses are:");
@@ -810,61 +810,60 @@ public class DatabaseHandler {
 				System.out.print("Select a course to enroll.");
 				int id = sc.nextInt();
 				state = con.prepareStatement(
-						"select count(*) from prereq where courseprereq_id not in (select e.course_id from e.enrolled,s.student where s.student_id=e.student_id and s.username=? and e.course_id=?)");
+						"select count(*) from prereq where courseprereq_id not in (select e.course_id from enrolled e,student s where s.student_id=e.student_id and s.username=?) and course_id=?");
 				state.setString(1, username);
 				state.setString(2, course[id - 1]);
 				ResultSet rs1 = state.executeQuery();
 				if (rs1.next()) {
 					if (rs1.getInt(1) > 0) {
 						System.out.println("You can't enroll since prequisite course/s is not taken.");
-					}
-				} else {
-					state = con.prepareStatement("Select credits from course where course_id = ?");
-					state.setString(1, course[id - 1]);
-					rs = state.executeQuery();
-					rs.next();
-					String credit = rs.getString(1);
-					state = con.prepareStatement("Select student_id where username = ?");
-					state.setString(1, username);
-					rs = state.executeQuery();
-					int studentid = rs.getInt(1);
-					state = con.prepareStatement("Select mingpa from course where course_id = ?");
-					state.setString(1, course[id - 1]);
-					rs = state.executeQuery();
-
-					if (!rs.next()) {
-
-						enroll(studentid, course[id - 1], "S17", credit);
 					} else {
-						float mingpa = rs.getFloat(1);
-						state = con.prepareStatement("Select gpa from student where username = ?");
+						state = con.prepareStatement("Select credits from course where course_id = ?");
+						state.setString(1, course[id - 1]);
+						rs = state.executeQuery();
+						rs.next();
+						String credit = rs.getString(1);
+						state = con.prepareStatement("Select student_id from student where username = ?");
 						state.setString(1, username);
 						rs = state.executeQuery();
-						if (rs.next()) {
-
-							if (rs.getFloat(1) < mingpa) {
-								System.out.println("You can't enroll since minimum gpa requirement is not met.");
-							} else {
-								enroll(studentid, course[id - 1], "S17", credit);
-							}
-
-							System.out.println("You can't enroll since minimum gpa requirement is not met.");
+						rs.next();
+						int studentid = rs.getInt(1);
+						state = con.prepareStatement("Select mingpa from course where course_id = ?");
+						state.setString(1, course[id - 1]);
+						rs = state.executeQuery();
+						if (!rs.next()) {
+							enroll(studentid, course[id - 1], "S17", credit);
 						} else {
-							System.out.println("You can't enroll since minimum gpa requirement is not met.");
+							float mingpa = rs.getFloat(1);
+							state = con.prepareStatement("Select gpa from student where username = ?");
+							state.setString(1, username);
+							rs = state.executeQuery();
+							if (rs.next()) {
+								if (rs.getFloat(1) < mingpa) {
+									System.out.println("You can't enroll since minimum gpa requirement is not met.");
+								} else {
+									enroll(studentid, course[id - 1], "S17", credit);
+								}
+							} else {
+								System.out.println("You can't enroll since minimum gpa requirement is not met.");
+							}
 						}
 					}
-				}
 
-			} else
-				System.out.print("\nNo courses available right now.");
+				} else
+					System.out.print("\nNo courses available right now.");
 
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void enroll(int studentid, String courseid, String sem, String credits) {try{
-			state = con.prepareStatement("select maxsize, studentsenrolled, studentswaitlisted from offering where course_id = ? and sem = ?");
+	public void enroll(int studentid, String courseid, String sem, String credits) {
+		System.out.println("In enrolled");
+		try {
+			state = con.prepareStatement(
+					"select maxsize, studentsenrolled, studentswaitlisted from offering where course_id = ? and sem = ?");
 			state.setString(1, courseid);
 			state.setString(2, sem);
 			ResultSet rs = state.executeQuery();
@@ -872,19 +871,19 @@ public class DatabaseHandler {
 			int size = rs.getInt(1);
 			int enrolled = rs.getInt(2);
 			int waitlist = rs.getInt(3);
-			boolean available = (size>enrolled)? true:false;
-			
-			state = con.prepareStatement("insert into enrolled (student_id, course_id, sem, coursecredits, waitlistnumber, enrolledstatus) values (?,?,?,?,?,?)");
+			boolean available = (size > enrolled) ? true : false;
+
+			state = con.prepareStatement(
+					"insert into enrolled (student_id, course_id, sem, coursecredits, waitlistnumber, enrolledstatus) values (?,?,?,?,?,?)");
 			state.setInt(1, studentid);
 			state.setString(2, courseid);
 			state.setString(3, sem);
 			state.setString(4, credits);
-			if(available){
+			if (available) {
 				state.setInt(5, 0);
 				state.setString(6, "Y");
-			}
-			else{
-				state.setInt(5, waitlist+1);
+			} else {
+				state.setInt(5, waitlist + 1);
 				state.setString(6, "N");
 			}
 			state.executeQuery();
