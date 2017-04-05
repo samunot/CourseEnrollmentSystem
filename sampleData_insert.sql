@@ -60,13 +60,13 @@ insert into offering values('CSC520','CSC','F16',2,2,'EB2',1,0,'M W 11:00AM-12:0
 insert into offering values('CSC525','CSC','F16',0,2,'EB3',1,0,'M W 3:00PM-4:00PM');
 insert into offering values('CE420','CSC','F16',2,4,'EB1',4,1,'F 3:00PM-5:00PM');
 --spring
-insert into offering values('CSC402','CSC','S17',2,2,'EB2',2,0,'M W 11:00AM-12:00PM');
-insert into offering values('CSC510','CSC','S17',2,5,'EB1',5,1,'Tu Th 1:00PM-2:00PM');
-insert into offering values('CSC505','CSC','S17',2,2,'EB2',2,2,'M W 11:00AM-12:00PM');
-insert into offering values('CSC521','CSC','S17',2,3,'EB3',3,2,'Tu Th 1:00PM-2:00PM');
-insert into offering values('CSC525','CSC','S17',0,2,'EB1',2,0,'M W 2:00PM-3:00PM');
-insert into offering values('CSC530','CSC','S17',2,2,'EB3',1,0,'M TW 11:00AM-12:00PM');
-insert into offering values('CE421','ECE','S17',4,2,'EB3',1,0,'Tu Th 4:00PM-5:00PM');
+insert into offering values('CSC402','CSC','S17',2,2,'EB2',0,0,'M W 11:00AM-12:00PM');
+insert into offering values('CSC510','CSC','S17',2,5,'EB1',0,0,'Tu Th 1:00PM-2:00PM');
+insert into offering values('CSC505','CSC','S17',2,2,'EB2',0,0,'M W 11:00AM-12:00PM');
+insert into offering values('CSC521','CSC','S17',2,3,'EB3',0,0,'Tu Th 1:00PM-2:00PM');
+insert into offering values('CSC525','CSC','S17',0,2,'EB1',0,0,'M W 2:00PM-3:00PM');
+insert into offering values('CSC530','CSC','S17',2,2,'EB3',0,0,'M TW 11:00AM-12:00PM');
+insert into offering values('CE421','ECE','S17',4,2,'EB3',0,0,'Tu Th 4:00PM-5:00PM');
 
 --departmentCourse
 insert into departmentCourse values('CSC','CSC505');
