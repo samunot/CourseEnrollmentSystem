@@ -92,7 +92,7 @@ END;
 --Complete but one grade slow
 ------GPA Calculation
 CREATE OR REPLACE TRIGGER gpa_calculator
-AFTER INSERT ON ENROLLED
+BEFORE INSERT ON ENROLLED
 FOR EACH ROW
 DECLARE
 
@@ -104,7 +104,7 @@ WHERE e.student_id=:new.student_id and e.grade = g.grade;
 
 UPDATE STUDENT
 SET gpa = s_gpa
-    --WHERE student_id = :new.student_id;
+WHERE student_id = :new.student_id;
    
 END;
 /
