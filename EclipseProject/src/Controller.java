@@ -209,7 +209,7 @@ public class Controller {
 	
 	private static int StudentEnrollViewDropCourse(){
 		sc=new Scanner(System.in);
-		System.out.print("\n1.View Available Courses\n2. View My Courses\nPress 0 to go back.\nEnter Choice:");
+		System.out.print("\n1.View Available Courses\n2. View My Courses\n3. Drop Course\nPress 0 to go back.\nEnter Choice:");
 		int key=sc.nextInt();
 		switch(key){
 		case 1:
@@ -217,6 +217,9 @@ public class Controller {
 			break;
 		case 2:
 			dbhandler.StudentViewMyCourses(username);
+			break;
+		case 3: 
+			dbhandler.StudentDropCourses(username);
 			break;
 		case 0:
 			return 1;

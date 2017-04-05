@@ -286,9 +286,13 @@ public class DatabaseHandler {
 			}
 			System.out.println("Press 0 to go back");
 			int key = sc.nextInt();
-			while (key != 0) {
-				System.out.println("Invalid Option");
-				key = sc.nextInt();
+			if (key == 0) {
+				return;
+			} else {
+				while (key != 0) {
+					System.out.println("Invalid Option");
+					key = sc.nextInt();
+				}
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -430,18 +434,29 @@ public class DatabaseHandler {
 					System.out.println(rs.getString(1) + " " + rs.getString(2));
 				}
 			} else {
-				System.out.println("Invalid values. Please try again!");
-				viewOffering();
+				System.out.println("Invalid values! Press 0 to go back or 1 to retry");
+				int choice = sc.nextInt();
+				while (!(choice == 0 || choice == 1)) {
+					System.out.println("Please enter valid option");
+					choice = sc.nextInt();
+				}
+				if (choice == 1)
+					viewOffering();
+				else
+					return;
 			}
 			System.out.println("Press 0 to go back");
 			int key = sc.nextInt();
-			while (key != 0) {
-				System.out.println("Invalid Option");
-				key = sc.nextInt();
+			if (key == 0)
+				return;
+			else {
+				while (key != 0) {
+					System.out.println("Invalid Option");
+					key = sc.nextInt();
+				}
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
-			e.printStackTrace();
 			System.out.println("Invalid values! Press 0 to go back or 1 to retry");
 			int choice = sc.nextInt();
 			while (!(choice == 0 || choice == 1)) {
@@ -552,9 +567,9 @@ public class DatabaseHandler {
 	public void enforceDeadline() {
 		try {
 			System.out.println("Enforce Deadline:\n1.Yes\n2.No");
-			String key = sc.next();
+			int key = sc.nextInt();
 			switch (key) {
-			case "Yes":
+			case 1:
 				state = con.prepareStatement("select addDeadline from semester where sem='S17'");
 				ResultSet rs = state.executeQuery();
 				rs.next();
@@ -579,7 +594,7 @@ public class DatabaseHandler {
 				} else
 					System.out.println("Deadline already enforced");
 				break;
-			case "No":
+			case 2:
 				return;
 			default:
 				System.out.println("Invalid choice. Please try again!");
@@ -780,7 +795,7 @@ public class DatabaseHandler {
 		try {
 			sc = new Scanner(System.in);
 			state = con.prepareStatement(
-					"select c.course_id,c.title from course c,enrolled e,student s where s.username=? and e.student_id=s.student_id and e.enrolledstatus='Y' and e.sem='F16' and c.course_id=e.course_id");
+					"select c.course_id,c.title from course c,enrolled e,student s where s.username=? and e.student_id=s.student_id and e.enrolledstatus='Y' and c.course_id=e.course_id");
 			state.setString(1, username);
 			ResultSet rs = state.executeQuery();
 			System.out.println("CourseID\tCourse Name");
@@ -792,10 +807,42 @@ public class DatabaseHandler {
 		}
 	}
 
+	public void StudentDropCourses(String username) {
+		try {
+			sc = new Scanner(System.in);
+			state = con.prepareStatement(
+					"select c.course_id,c.title from course c,enrolled e,student s where s.username=? and e.student_id=s.student_id and e.enrolledstatus='Y' and c.course_id=e.course_id");
+			state.setString(1, username);
+			ResultSet rs = state.executeQuery();
+			System.out.println("CourseID\tCourse Name");
+			int i=0;
+			String[] course = new String[rs.getFetchSize()];
+			while (rs.next()) {
+				course[i] = rs.getString(1);
+				System.out.println((i+1)+"."+course[i]+ "\t\t" + rs.getString(2));
+				i++;
+			}
+		
+			System.out.println("Select option: ");
+			int k = sc.nextInt();
+			state = con.prepareStatement("delete from enrolled where course_id = ? and student_id in (Select student_id from student where username = ?)");
+			state.setString(1, course[k-1]);
+			state.setString(2, username);
+			state.executeQuery();
+			con.commit();
+			System.out.println("Course dropped successfully!");
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println("Course dropping failed!");
+
+		}
+	}
+
 	public void StudentViewAvailableCourse(String username) {
 		try {
 			sc = new Scanner(System.in);
-			state = con.prepareStatement("select o1.course_id from offering o1 where o1.sem='S17' AND o1.maxsize>o1.studentsenrolled union select o2.course_id from offering o2 where o2.sem='S17' AND o2.maxsize=o2.studentsenrolled AND o2.maxwaitist>o2.studentswaitlisted MINUS select course_id from enrolled e where e.student_id in (select student_id from student where username = ?)");
+			state = con.prepareStatement(
+					"select o1.course_id from offering o1 where o1.sem='S17' AND o1.maxsize>o1.studentsenrolled union select o2.course_id from offering o2 where o2.sem='S17' AND o2.maxsize=o2.studentsenrolled AND o2.maxwaitist>o2.studentswaitlisted MINUS select course_id from enrolled e where e.student_id in (select student_id from student where username = ?)");
 			state.setString(1, username);
 			ResultSet rs = state.executeQuery();
 			if (rs.isBeforeFirst()) {
@@ -860,36 +907,72 @@ public class DatabaseHandler {
 	}
 
 	public void enroll(int studentid, String courseid, String sem, String credits) {
-		System.out.println("In enrolled");
 		try {
-			state = con.prepareStatement(
-					"select maxsize, studentsenrolled, studentswaitlisted from offering where course_id = ? and sem = ?");
+			state = con.prepareStatement("Select permission from course where course_id = ?");
 			state.setString(1, courseid);
-			state.setString(2, sem);
 			ResultSet rs = state.executeQuery();
 			rs.next();
-			int size = rs.getInt(1);
-			int enrolled = rs.getInt(2);
-			int waitlist = rs.getInt(3);
-			boolean available = (size > enrolled) ? true : false;
-
-			state = con.prepareStatement(
-					"insert into enrolled (student_id, course_id, sem, coursecredits, waitlistnumber, enrolledstatus) values (?,?,?,?,?,?)");
-			state.setInt(1, studentid);
-			state.setString(2, courseid);
-			state.setString(3, sem);
-			state.setString(4, credits);
-			if (available) {
-				state.setInt(5, 0);
-				state.setString(6, "Y");
+			if (rs.getString(1).equals("Y")) {
+				state = con.prepareStatement(
+						"Insert into specialpermission (Course_id, student_id, sem, reqdate) values (?,?,?,?)");
+				state.setString(1, courseid);
+				state.setInt(2, studentid);
+				state.setString(3, sem);
+				Date dnow = new Date(System.currentTimeMillis());
+				DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
+				String mydateStr = df.format(dnow);
+				Calendar cal = Calendar.getInstance();
+				cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mydateStr.split("-")[1]));
+				cal.set(Calendar.MONTH, Integer.parseInt(mydateStr.split("-")[0]) - 1);
+				cal.set(Calendar.YEAR, Integer.parseInt(mydateStr.split("-")[2]));
+				state.setDate(4, new Date(cal.getTimeInMillis()));
+				state.executeQuery();
+				System.out.println("Course requested for Permission!");
 			} else {
-				state.setInt(5, waitlist + 1);
-				state.setString(6, "N");
+				state = con.prepareStatement(
+						"select maxsize, studentsenrolled, studentswaitlisted from offering where course_id = ? and sem = ?");
+				state.setString(1, courseid);
+				state.setString(2, sem);
+				rs = state.executeQuery();
+				rs.next();
+				int size = rs.getInt(1);
+				int enrolled = rs.getInt(2);
+				int waitlist = rs.getInt(3);
+				boolean available = (size > enrolled) ? true : false;
+
+				state = con.prepareStatement(
+						"insert into enrolled (student_id, course_id, sem, coursecredits, waitlistnumber, enrolledstatus) values (?,?,?,?,?,?)");
+				state.setInt(1, studentid);
+				state.setString(2, courseid);
+				state.setString(3, sem);
+				if (credits.length() > 1) {
+					int min = Integer.parseInt(credits.split("-")[0]);
+					int max = Integer.parseInt(credits.split("-")[1]);
+					System.out.println("Enter credits between " + min + "and " + max + ": ");
+					int val = sc.nextInt();
+					while (!(val >= min && val <= max)) {
+						System.out.println("Invalid Number of credits. Choose again");
+						val = sc.nextInt();
+					}
+					state.setInt(4, val);
+
+				} else {
+					state.setInt(4, Integer.parseInt(credits));
+				}
+				if (available) {
+					state.setInt(5, 0);
+					state.setString(6, "Y");
+				} else {
+					state.setInt(5, waitlist + 1);
+					state.setString(6, "N");
+				}
+				state.executeQuery();
+				con.commit();
+				System.out.println("Successfully enrolled!");
 			}
-			state.executeQuery();
-			con.commit();
-			System.out.println("Successfully enrolled!");
-		} catch (Exception e) {
+		} catch (
+
+		Exception e) {
 			// TODO: handle exception
 			System.out.println("Enrollment failed!");
 			e.printStackTrace();
