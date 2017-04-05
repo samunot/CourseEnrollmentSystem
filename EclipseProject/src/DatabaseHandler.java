@@ -227,9 +227,18 @@ public class DatabaseHandler {
 				state.setInt(2, studentid);
 				state.setString(3, courseid[choice]);
 				if (state.executeUpdate() >= 1) {
-					System.out.println("Grade successfully entered!");
+					state = con.prepareStatement("SELECT (sum(g.pointsperhour*e.coursecredits)/sum(e.coursecredits)) as gpa FROM enrolled e, gradingsystem g WHERE e.student_id=? and e.grade = g.grade");
+					state.setInt(1, studentid);
+					rs = state.executeQuery();
+					rs.next();
+					float gpa = rs.getFloat(1);
+					state = con.prepareStatement("UPDATE STUDENT SET gpa = ? WHERE student_id = ?");
+					state.setFloat(1, gpa);
+					state.setInt(2, studentid);
+					System.out.println("Succesful!");
 					con.commit();
 				} else {
+					con.rollback();
 					System.out.println("Failed!");
 				}
 			}
