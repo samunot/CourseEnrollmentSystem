@@ -968,7 +968,9 @@ public class DatabaseHandler {
 				}
 				state.executeQuery();
 				con.commit();
-				System.out.println("Successfully enrolled!");
+				if(available)
+					System.out.println("Successfully enrolled!");
+				else System.out.println("Successfully added to waitlist!");
 			}
 		} catch (
 
