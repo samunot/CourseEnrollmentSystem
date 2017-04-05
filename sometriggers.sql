@@ -243,23 +243,4 @@ SELECT costPerCredit
 
 
 
-insert into users values('Badass','Nigga','riri','44444','student','12-31-1991',123654,'Avent Ferry Road','Raleigh',27606,'NC');
-insert into student values(1952,'riri',3.78,'fall 16',3,15670.0,0.0,0,0,2,'N','BAN@gmail.com');
-DELETE from users WHERE firstname='Badass';
-
-
-
-CREATE OR REPLACE TRIGGER manipulate_salary
-BEFORE INSERT OR DELETE OR UPDATE 
-ON customers 
-FOR EACH ROW
-BEGIN
-:new.salary := :new.salary +500;
-END; 
-/ 
-
-
 SELECT trigger_name, status FROM user_triggers;
-
-samunot@orcl
-200157647
