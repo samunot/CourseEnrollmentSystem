@@ -14,7 +14,7 @@ public class Controller {
 
 	private static void loginExit() {
 		sc = new Scanner(System.in);
-		System.out.println("1.Login\n2.Exit\nEnter choice");
+		System.out.print("1.Login\n2.Exit\nEnter choice:");
 		int key = sc.nextInt();
 		switch (key) {
 		case 1:
@@ -43,8 +43,12 @@ public class Controller {
 		} else if (isStudent == 2) {
 			adminFunctions();
 		} else {
-			System.out.println("Invalid username or password. Please try again!");
-			login();
+			System.out.println("Invalid username or password. \nPress 0 to go back\nPress any other key to try again");
+			int key=sc.nextInt();
+			if(key==0)
+				loginExit();
+			else
+				login();
 		}
 	}
 
