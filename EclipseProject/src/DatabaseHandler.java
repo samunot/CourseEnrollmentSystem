@@ -227,7 +227,8 @@ public class DatabaseHandler {
 				state.setInt(2, studentid);
 				state.setString(3, courseid[choice]);
 				if (state.executeUpdate() >= 1) {
-					state = con.prepareStatement("SELECT (sum(g.pointsperhour*e.coursecredits)/sum(e.coursecredits)) as gpa FROM enrolled e, gradingsystem g WHERE e.student_id=? and e.grade = g.grade");
+					state = con.prepareStatement(
+							"SELECT (sum(g.pointsperhour*e.coursecredits)/sum(e.coursecredits)) as gpa FROM enrolled e, gradingsystem g WHERE e.student_id=? and e.grade = g.grade");
 					state.setInt(1, studentid);
 					rs = state.executeQuery();
 					rs.next();
@@ -533,16 +534,16 @@ public class DatabaseHandler {
 		try {
 			System.out.println("List of pending requests:");
 			state = con.prepareStatement(
-					"select student_id, course_id, sem, reqdate from specialpermission where approvedate is NULL");
+					"select student_id, course_id, sem, credits, reqdate from specialpermission where approvedate is NULL");
 			DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
 			ResultSet rs = state.executeQuery();
 			String[] specialperm = new String[rs.getFetchSize()];
 			int i = 0;
-			System.out.println("  student_id\tcourse_id\tsem\treqdate");
+			System.out.println("  student_id\tcourse_id\tsem\tcredits\treqdate");
 			while (rs.next()) {
-				System.out.println((i + 1) + ". " + rs.getInt(1) + "\t" + rs.getString(2) + "\t" + rs.getString(3)
-						+ "\t" + df.format(rs.getDate(4)));
-				specialperm[i] = rs.getInt(1) + "\t" + rs.getString(2) + "\t" + rs.getString(3);
+				System.out.println((i + 1) + ". " + rs.getInt(1) + "\t" + rs.getString(2) + "\t" + rs.getString(3)+"\t"+rs.getInt(4)
+						+ "\t" + df.format(rs.getDate(5)));
+				specialperm[i] = rs.getInt(1) + "\t" + rs.getString(2) + "\t" + rs.getString(3)+"\t"+rs.getInt(4);
 				i++;
 			}
 			if (i == 0) {
@@ -556,14 +557,17 @@ public class DatabaseHandler {
 				state = con.prepareStatement(
 						"update specialpermission set approvedate = ?, approvestatus = ? where student_id= ? and course_id = ? and sem = ?");
 				state.setDate(1, date);
-				if (status == 1)
+				if (status == 1) {
 					state.setString(2, "Y");
-				else
+					enroll(Integer.parseInt(specialperm[choice - 1].split("\t")[0]), specialperm[choice - 1].split("\t")[1], specialperm[choice - 1].split("\t")[2], specialperm[choice - 1].split("\t")[3]);
+
+				}else
 					state.setString(2, "N");
 				state.setInt(3, Integer.parseInt(specialperm[choice - 1].split("\t")[0]));
 				state.setString(4, specialperm[choice - 1].split("\t")[1]);
 				state.setString(5, specialperm[choice - 1].split("\t")[2]);
 				state.executeQuery();
+
 				con.commit();
 				System.out.println("Succesfully responded!");
 			}
