@@ -696,9 +696,8 @@ public class DatabaseHandler {
 
 	public void StudentViewPendingCourse(String username) {
 		try {
-			state = con.prepareStatement("select c.course_id,c.title from course c,enrolled e,student s,offering o "
-					+ "where s.username=? and e.student_id=s.student_id and c.course_id=e.course_id and e.sem='S17' "
-					+ "and e.waitlistnumber>0 and o.maxwaitist>0");
+			state = con.prepareStatement(
+					"select course_id, title from course where course_id in(Select course_id from enrolled where waitlistnumber>0 and sem='S17' and student_id in (select student_id from student where username = ?))");
 			state.setString(1, username);
 			ResultSet rs = state.executeQuery();
 			if (rs.isBeforeFirst()) {
@@ -795,7 +794,7 @@ public class DatabaseHandler {
 		try {
 			sc = new Scanner(System.in);
 			state = con.prepareStatement(
-					"select c.course_id,c.title from course c,enrolled e,student s where s.username=? and e.student_id=s.student_id and e.enrolledstatus='Y' and c.course_id=e.course_id");
+					"select course_id, title from course where course_id in (Select course_id from enrolled where enrolledstatus='Y' and student_id in(Select student_id from student where username = ?))");
 			state.setString(1, username);
 			ResultSet rs = state.executeQuery();
 			System.out.println("CourseID\tCourse Name");
@@ -809,28 +808,37 @@ public class DatabaseHandler {
 
 	public void StudentDropCourses(String username) {
 		try {
-			sc = new Scanner(System.in);
-			state = con.prepareStatement(
-					"select c.course_id,c.title from course c,enrolled e,student s where s.username=? and e.student_id=s.student_id and e.enrolledstatus='Y' and c.course_id=e.course_id");
-			state.setString(1, username);
+
+			state = con.prepareStatement("Select count(*) from semester where sem = 'S17' and dropdeadline is null");
 			ResultSet rs = state.executeQuery();
-			System.out.println("CourseID\tCourse Name");
-			int i=0;
-			String[] course = new String[rs.getFetchSize()];
-			while (rs.next()) {
-				course[i] = rs.getString(1);
-				System.out.println((i+1)+"."+course[i]+ "\t\t" + rs.getString(2));
-				i++;
+			rs.next();
+			if (rs.getInt(1) > 0) {
+				sc = new Scanner(System.in);
+				state = con.prepareStatement(
+						"select c.course_id,c.title from course c,enrolled e,student s where s.username=? and e.student_id=s.student_id and e.enrolledstatus='Y' and c.course_id=e.course_id");
+				state.setString(1, username);
+				rs = state.executeQuery();
+				System.out.println("CourseID\tCourse Name");
+				int i = 0;
+				String[] course = new String[rs.getFetchSize()];
+				while (rs.next()) {
+					course[i] = rs.getString(1);
+					System.out.println((i + 1) + "." + course[i] + "\t\t" + rs.getString(2));
+					i++;
+				}
+
+				System.out.println("Select option: ");
+				int k = sc.nextInt();
+				state = con.prepareStatement(
+						"delete from enrolled where course_id = ? and student_id in (Select student_id from student where username = ?)");
+				state.setString(1, course[k - 1]);
+				state.setString(2, username);
+				state.executeQuery();
+				con.commit();
+				System.out.println("Course dropped successfully!");
+			} else {
+				System.out.println("You cannot drop courses as deadline has been enforced!");
 			}
-		
-			System.out.println("Select option: ");
-			int k = sc.nextInt();
-			state = con.prepareStatement("delete from enrolled where course_id = ? and student_id in (Select student_id from student where username = ?)");
-			state.setString(1, course[k-1]);
-			state.setString(2, username);
-			state.executeQuery();
-			con.commit();
-			System.out.println("Course dropped successfully!");
 		} catch (Exception e) {
 			// TODO: handle exception
 			System.out.println("Course dropping failed!");
@@ -968,9 +976,10 @@ public class DatabaseHandler {
 				}
 				state.executeQuery();
 				con.commit();
-				if(available)
+				if (available)
 					System.out.println("Successfully enrolled!");
-				else System.out.println("Successfully added to waitlist!");
+				else
+					System.out.println("Successfully added to waitlist!");
 			}
 		} catch (
 
